@@ -71,3 +71,5 @@ bool db_has_table_str(db db, string table_name);
 
 #include "db_all_types.snippet.h"
 ownable_string db_column_string(db db, int col);
+typedef uint64_t identifier;
+#define db_column_identifier db_column_int64
