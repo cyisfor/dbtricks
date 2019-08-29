@@ -2,16 +2,13 @@
 #include "ownable_string.h"
 #include "mystring.h"
 
-#include <sqlite3.h>
 #include <stdlib.h> // size_t
 #include <stdbool.h>
-
-typedef sqlite3_int64 ident;
 
 struct db {
 	int dberr;
 };
-typedef struct db* db;
+typedef struct db *db;
 
 struct db_open_params {
 	const char* path;
@@ -47,13 +44,13 @@ int db_check(int res);
 int db_exec_str(db db, string sql);
 
 #define RESULT_HANDLER(name) \
-	bool name(int res, int n, sqlite3_stmt* stmt, string sql, string tail)
+	bool name(int res, int n, db_stmt stmt, string sql, string tail)
 
 typedef RESULT_HANDLER((*result_handler));
 
-void db_execmany(db db, string sql, result_handler on_err);
+void db_execmany(db db, result_handler on_err, string sql);
 
-void db_load(db db, const char* path, result_handler on_res);
+void db_load(db db, result_handler on_res, const char* path);
 
 ident db_lastrow(db db);
 

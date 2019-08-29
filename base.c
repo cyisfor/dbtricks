@@ -188,11 +188,11 @@ void db_close(db db) {
 	record(ERROR,"could not close the database");
 }
 
-void db_load(db db, const char* path, result_handler on_res) {
+void db_load(db db, result_handler on_res, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	db_execmanyn(db, sql, on_res);
+	db_execmany(db, on_res, sql);
 	munmap((void*)sql.base, sql.len);
 }
 
@@ -203,11 +203,16 @@ int db_exec_str(db db, string sql) {
 	return res;
 }
 
-result db_execmany(db public, string tail, result_handler on_res) {
-	sqlite3* c = ((dbpriv)public)->c;
+result db_execmany(db public, result_handler on_res, string tail) {
+	dbpriv priv = (dbpriv)public;
+	sqlite3* c = priv->c;
 	db_stmt stmt = NULL;
 	const char* next = NULL;
 	int i = 0;
+	struct db_stmt dbstmt = {
+		.db = priv;
+		.sqlite = NULL;
+	};
 	for(;;++i) {
 		string cur = {
 			.base = tail.base,
@@ -219,8 +224,10 @@ result db_execmany(db public, string tail, result_handler on_res) {
 									 &next);
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
-			if(on_res)													\
-				return on_res(res,i,stmt,cur, sql);						\
+			if(on_res) {												\
+				dbstmt.sqlite = stmt;									\
+				return on_res(res,i,&dbstmt,cur, sql);					\
+			}															\
 			return fail;												\
 		}
 		CHECK;
@@ -234,8 +241,10 @@ result db_execmany(db public, string tail, result_handler on_res) {
 		CHECK;
 		res = sqlite3_finalize(stmt);
 		CHECK;
-		if(on_res)
-			if(fail == on_res(res,i,stmt,cur,sql)) return fail;
+		if(on_res) {
+			dbstmt.sqlite = stmt;
+			if(fail == on_res(res,i,&dbstmt,cur,sql)) return fail;
+		}
 		if(next == NULL)
 			return succeed;
 	}
