@@ -204,6 +204,7 @@ int db_exec_str(db db, string sql) {
 	return res;
 }
 
+#define START_OPERATION
 #define HANDLE_STATEMENT(stmt)					\
 	res = sqlite3_step(stmt);					\
 	CHECK;										\
@@ -211,11 +212,11 @@ int db_exec_str(db db, string sql) {
 	CHECK;
 #define HANDLE_EXTRA(tail)
 #define OPERATION db_execmany
-#define START_OPERATION
 #define CHECK_RESULT on_res
 #define THING_HANDLER result_handler
 #include "domany.snippet.h"
 
+#define START_OPERATION string name;
 #define HANDLE_STATEMENT(stmt)
 #define HANDLE_EXTRA(tail) {										\
 		const char* newline = memchr(tail.base, '\n', tail.len);	\
@@ -229,12 +230,12 @@ int db_exec_str(db db, string sql) {
 		tail.len -= name.len + 1;									\
 	}
 #define OPERATION db_preparemany
-#define START_OPERATION string name;
 #define CHECK_RESULT(res,i,stmt,cur,sql) on_res(res,i,stmt,name,cur,tail)
 #define THING_HANDLER prepare_handler
 #include "domany.snippet.h"
 
-result db_prepare_many_from_file(db public, prepare_handler on_res, const char* path) {
+result db_prepare_many_from_file(db public, prepare_handler on_res,
+								 const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);

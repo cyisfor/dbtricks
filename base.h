@@ -1,9 +1,10 @@
 #include "result.h"
-#include "ownable_string.h"
 #include "mystring.h"
 
 #include <stdlib.h> // size_t
 #include <stdbool.h>
+
+typedef uint64_t identifier;
 
 struct db {
 	int dberr;
@@ -48,11 +49,14 @@ int db_exec_str(db db, string sql);
 
 typedef RESULT_HANDLER((*result_handler));
 
-void db_execmany(db db, result_handler on_err, string sql);
+result db_execmany(db db, result_handler on_err, string sql);
+result db_preparemany(db public, prepare_handler on_res, string sql);
 
-void db_load(db db, result_handler on_res, const char* path);
+result db_load(db db, result_handler on_res, const char* path);
+result db_preparemany_from_file(db public, prepare_handler on_res,
+								const char* path);
 
-ident db_lastrow(db db);
+identifer db_lastrow(db db);
 
 void db_savepoint(db db);
 void db_release(db db);
@@ -68,5 +72,4 @@ bool db_has_table_str(db db, string table_name);
 
 #include "db_all_types.snippet.h"
 ownable_string db_column_string(db db, int col);
-typedef uint64_t identifier;
 #define db_column_identifier db_column_int64
