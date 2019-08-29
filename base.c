@@ -203,51 +203,8 @@ int db_exec_str(db db, string sql) {
 	return res;
 }
 
-result db_execmany(db public, result_handler on_res, string tail) {
-	dbpriv priv = (dbpriv)public;
-	sqlite3* c = priv->c;
-	db_stmt stmt = NULL;
-	const char* next = NULL;
-	int i = 0;
-	struct db_stmt dbstmt = {
-		.db = priv;
-		.sqlite = NULL;
-	};
-	for(;;++i) {
-		string cur = {
-			.base = tail.base,
-			.len = 0;
-		};
-		int res = sqlite3_prepare_v2(priv->c,
-									 tail.base, tail.len,
-									 &stmt,
-									 &next);
-#define CHECK															\
-		if(res != SQLITE_OK) {											\
-			if(on_res) {												\
-				dbstmt.sqlite = stmt;									\
-				return on_res(res,i,&dbstmt,cur, sql);					\
-			}															\
-			return fail;												\
-		}
-		CHECK;
-		if(stmt == NULL) return true; // just trailing comments, whitespace
-		if(next != NULL) {
-			cur.len = next - tail.base;
-			tail.len -= cur.len;
-			tail.base = next;
-		}
-		res = sqlite3_step(stmt);
-		CHECK;
-		res = sqlite3_finalize(stmt);
-		CHECK;
-		if(on_res) {
-			dbstmt.sqlite = stmt;
-			if(fail == on_res(res,i,&dbstmt,cur,sql)) return fail;
-		}
-		if(next == NULL)
-			return succeed;
-	}
+void db_preparemany(db public, prepare_handler on_res, string sql) {
+	
 }
 
 db_stmt db_prepare_str(db public, string sql) {
