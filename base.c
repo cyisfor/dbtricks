@@ -294,3 +294,7 @@ size_t db_total_changes(db db) {
 
 #define IMPLEMENTATION
 #include "db_all_types.snippet.h"
+
+ownable_string db_column_string(db db, int col) {
+	
+}

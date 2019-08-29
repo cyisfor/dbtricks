@@ -1,4 +1,5 @@
 #include "result.h"
+#include "ownable_string.h"
 #include "mystring.h"
 
 #include <sqlite3.h>
@@ -69,3 +70,4 @@ bool db_has_table_str(db db, string table_name);
 #define db_has_table(db, lit) db_has_table_str(db, LITSTR(lit))
 
 #include "db_all_types.snippet.h"
+ownable_string db_column_string(db db, int col);
