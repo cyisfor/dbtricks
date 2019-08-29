@@ -39,5 +39,6 @@ result OPERATION(db public, result_handler on_res, string tail) {
 		}
 		if(next == NULL)
 			return succeed;
+		HANDLE_EXTRA(tail);
 	}
 }
