@@ -156,38 +156,37 @@ void N(once)(N(stmt) stmt) {
 	sqlite3_reset(stmt->sqlite);
 }
 
-void N(retransaction)(db db) {
-	if(((T)db)->transaction_level == 0) {
+void N(retransaction)(T self) {
+	if((self->transaction_level == 0) {
 		return;
 	}
-	N(release)(db);
-	N(savepoint)(db);
+	N(release)(self);
+	N(savepoint)(self);
 }
 
-void N(close)(db db) {
-	T priv = (T)db;
-	if(priv->transaction_level > 0) {
-		full_commit(priv);
+void N(close)(T self) {
+	if(self->transaction_level > 0) {
+		full_commit(self);
 	}
 
-	sqlite3_finalize(priv->begin);
-	sqlite3_finalize(priv->commit);
-	sqlite3_finalize(priv->rollback);
+	sqlite3_finalize(self->begin);
+	sqlite3_finalize(self->commit);
+	sqlite3_finalize(self->rollback);
 
 	int attempt = 0;
 	for(;attempt<10;++attempt) {
-		int res = sqlite3_close(priv->c);
+		int res = sqlite3_close(self->c);
 		if(res == SQLITE_OK) {
-			free(priv);
+			free(self);
 			return;
 		}
 		record(WARNING, "sqlite close error %s %s",
-			   sqlite3_errstr(res), sqlite3_errmsg(priv->c));
+			   sqlite3_errstr(res), sqlite3_errmsg(self->c));
 		if(attempt > 1) {
 			sleep(attempt);
 		}
 		sqlite3_stmt* stmt = NULL;
-		while((stmt = sqlite3_next_stmt(priv->c, stmt))) {
+		while((stmt = sqlite3_next_stmt(self->c, stmt))) {
 			record(WARNING,
 				   "closing statement\n%s\n",sqlite3_sql(stmt));
 			check(sqlite3_finalize(stmt));
@@ -196,20 +195,20 @@ void N(close)(db db) {
 	record(ERROR,"could not close the database");
 }
 
-result N(load)(db db, N(result_handler) on_res, const char* path) {
+enum N(state) N(load)(T db, N(result_handler) on_res, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	result ret = N(execmany)(db, on_res, sql);
+	int ret = N(execmany)(db, on_res, sql);
 	munmap((void*)sql.base, sql.len);
-	return ret;
+	return ret == SQLITE_OK ? BASEDB_OK : BASEDB_ERROR;
 }
 
-int N(exec_str)(db db, string sql) {
+enum N(state) N(exec_str)(T db, string sql) {
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
 	int res = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
-	return res;
+	return check(db, res);
 }
 
 #define START_OPERATION
