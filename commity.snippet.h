@@ -1,3 +1,5 @@
+#include "concatsym.h" // strify
+
 #ifdef INCREMENT
 #define ADJUST ++
 #define VALUE_TRIGGER 0
@@ -9,10 +11,10 @@
 #endif
 
 static
-int FUNCNAME(dbpriv db) {
+int FUNCNAME(T db) {
 	int res = SQLITE_ERROR;
 #ifndef INCREMENT
-	assert(db->transaction-depth > 0);
+	assert(db->transaction_depth > 0);
 #endif
 	if(db->transaction_depth == VALUE_TRIGGER) {
 		res = sqlite3_step(db->FULL_COMMIT);
@@ -45,9 +47,8 @@ int FUNCNAME(dbpriv db) {
 }
 
 EXPORT
-void CONCATSYM(db_, FUNCNAME)(db db) {
-	dbpriv priv = (dbpriv)db;
-	db_check(priv, FUNCNAME(priv));
+void CONCATSYM(db_, FUNCNAME)(T self) {
+	db_check(self, FUNCNAME(self));
 }
 /* defines db_release, db_savepoint, db_rollback */
 

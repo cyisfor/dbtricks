@@ -42,7 +42,7 @@ sqlite3_stmt* prepare(sqlite3* c, string sql) {
 		sql.base,
 		sql.len,
 		&stmt,
-		(const char*)&next);
+		(const char**)&next);
 	if(next && next - sql.base != sql.len) {
 		string tail = {
 			.base = next,
@@ -59,7 +59,7 @@ sqlite3_stmt* prepare(sqlite3* c, string sql) {
 }
 
 static
-db open_with_flags(const char* path, int flags) {
+T open_with_flags(const char* path, int flags) {
 	T db = calloc(1,sizeof(struct T));
 
 	//chdir(getenv("FILEDB"));
@@ -73,11 +73,10 @@ db open_with_flags(const char* path, int flags) {
 	db->begin = prepare(db->sqlite, LITSTR("BEGIN"));
 	db->commit = prepare(db->sqlite, LITSTR("COMMIT"));
 	db->rollback = prepare(db->sqlite, LITSTR("ROLLBACK"));
-	N(OK)(db);
-	return (db)db;
+	return db;
 }
 
-db N(open_f)(struct N(params) params) {
+T N(open_f)(struct N(open_params) params) {
 	return open_with_flags(params.path,
 						   params.readonly ?
 						   SQLITE_OPEN_READONLY :
