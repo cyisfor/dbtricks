@@ -1,3 +1,4 @@
+#include "record.h"
 #include "base.h"
 #include "itoa.h"
 #include "mmapfile.h"
