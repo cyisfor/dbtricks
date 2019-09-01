@@ -294,7 +294,7 @@ bool N(has_table_str)(T self, string table_name) {
 	sqlite3_bind_text(self->has_table,1,table_name.base,table_name.len,NULL);
 	// can't use N(once) because we expect SQLITE_ROW
 	int res = check(self, sqlite3_step(self->has_table));
-	sqlite3_reset(db->has_table);
+	sqlite3_reset(self->has_table);
 	return res == SQLITE_ROW;
 }
 
@@ -317,8 +317,8 @@ size_t N(total_changes)(T self) {
 
 string N(column_string)(N(stmt) stmt, int col) {
 	string ret = {
-		.base = sqlite3_column_blob(stmt->sqlite),
-		.len = sqlite3_column_bytes(stmt->sqlite)
+		.base = sqlite3_column_blob(stmt->sqlite, col),
+		.len = sqlite3_column_bytes(stmt->sqlite, col)
 	};
 	return ret;
 }
