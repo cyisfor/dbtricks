@@ -39,6 +39,8 @@
 #define BIND_ARGS s64 val
 #include "types.snippet.h"
 #define TYPE zeroblob
+#undef COLUMN_RETURN
+#define COLUMN_RETURN void*
 #undef BIND_ARGS
 #define BIND_ARGS int val
 #include "types.snippet.h"

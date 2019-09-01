@@ -4,6 +4,9 @@
 #include "mmapfile.h"
 #include "mystring.h"
 
+#include <sqlite3.h>
+
+
 #include <sys/mman.h> // munmap
 #include <string.h> // memchr
 
@@ -32,18 +35,18 @@ typedef struct T* T;
 
 static
 sqlite3_stmt* prepare(sqlite3* c, string sql) {
-	sqlite3_stmt* stmt
-	const char* N(next) = NULL;
+	sqlite3_stmt* stmt;
+	const byte* next = NULL;
 	int res = sqlite3_prepare_v2(
 		c,
 		sql.base,
 		sql.len,
 		&stmt,
-		&N(next));
-	if(N(next) && N(next) - sql.base != sql.len) {
+		(const char*)&next);
+	if(next && next - sql.base != sql.len) {
 		string tail = {
-			.base = N(next),
-			.len = sql.len - (N(next) - sql.base)
+			.base = next,
+			.len = sql.len - (next - sql.base)
 		};
 		record(WARNING, "some sql wouldn't prepare #.*s",
 			   STRING_FOR_PRINTF(tail));
