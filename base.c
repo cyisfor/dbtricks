@@ -219,9 +219,9 @@ result N(exec_str)(T db, string sql) {
 
 #define START_OPERATION
 #define HANDLE_STATEMENT(stmt)					\
-	res = sqlite3_step(stmt->sqlite);					\
+	res = sqlite3_step(stmt.sqlite);					\
 	CHECK;										\
-	res = sqlite3_finalize(stmt->sqlite);				\
+	res = sqlite3_finalize(stmt.sqlite);				\
 	CHECK;
 #define HANDLE_EXTRA(tail)
 #define OPERATION N(execmany)

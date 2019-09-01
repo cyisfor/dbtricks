@@ -1,29 +1,29 @@
 result OPERATION(T self, N(result_handler) on_res, string tail) {
-	sqlite3* c = self->c;
-	const char* next = NULL;
+	sqlite3* c = self->sqlite;
+	const byte* next = NULL;
 	int i = 0;
 	struct N(stmt) stmt = {
-		.db = self;
-		.sqlite = NULL;
+		.db = self,
+		.sqlite = NULL
 	};
 	for(;;++i) {
 		string cur = {
 			.base = tail.base,
-			.len = 0;
+			.len = 0
 		};
-		int res = sqlite3_prepare_v2(self->c,
+		int res = sqlite3_prepare_v2(self->sqlite,
 									 tail.base, tail.len,
-									 &stmt->sqlite,
-									 &next);
+									 &stmt.sqlite,
+									 (const char**)&next);
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				return on_res(res,i,&stmt,cur, sql);					\
+				return on_res(res,i,&stmt,cur, tail);					\
 			}															\
 			return fail;												\
 		}
 		CHECK;
-		if(stmt->sqlite == NULL)
+		if(stmt.sqlite == NULL)
 			return succeed; // just trailing comments, whitespace
 		if(next != NULL) {
 			cur.len = next - tail.base;
@@ -32,7 +32,7 @@ result OPERATION(T self, N(result_handler) on_res, string tail) {
 		}
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
-			if(fail == on_res(res,i,&stmt,cur,sql)) return fail;
+			if(fail == on_res(res,i,&stmt,cur,tail)) return fail;
 		}
 		if(next == NULL)
 			return succeed;
