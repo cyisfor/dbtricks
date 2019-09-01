@@ -208,9 +208,9 @@ int N(exec_str)(db db, string sql) {
 
 #define START_OPERATION
 #define HANDLE_STATEMENT(stmt)					\
-	res = sqlite3_step(stmt);					\
+	res = sqlite3_step(stmt->sqlite);					\
 	CHECK;										\
-	res = sqlite3_finalize(stmt);				\
+	res = sqlite3_finalize(stmt->sqlite);				\
 	CHECK;
 #define HANDLE_EXTRA(tail)
 #define OPERATION N(execmany)
@@ -248,10 +248,9 @@ result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
 	
 result N(execmany)(T self, N(result_handler) on_res, string tail, bool finalize) {
 	sqlite3* c = self->c;
-	N(stmt) stmt = NULL;
 	const char* next = NULL;
 	int i = 0;
-	struct N(stmt) dbstmt = {
+	struct N(stmt) stmt = {
 		.db = self;
 		.sqlite = NULL;
 	};
@@ -262,13 +261,13 @@ result N(execmany)(T self, N(result_handler) on_res, string tail, bool finalize)
 		};
 		int res = sqlite3_prepare_v2(self->c,
 									 tail.base, tail.len,
-									 &stmt,
+									 &stmt->sqlite,
 									 &next);
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				dbstmt.sqlite = stmt;									\
-				return on_res(res,i,&dbstmt,cur, sql);					\
+				stmt.sqlite = stmt;									\
+				return on_res(res,i,&stmt,cur, sql);					\
 			}															\
 			return fail;												\
 		}
@@ -284,8 +283,7 @@ result N(execmany)(T self, N(result_handler) on_res, string tail, bool finalize)
 		res = sqlite3_finalize(stmt);
 		CHECK;
 		if(on_res) {
-			dbstmt.sqlite = stmt;
-			if(fail == on_res(res,i,&dbstmt,cur,sql)) return fail;
+			if(fail == on_res(res,i,&stmt,cur,sql)) return fail;
 		}
 		if(next == NULL)
 			return succeed;
