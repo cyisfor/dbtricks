@@ -163,7 +163,7 @@ void N(once)(N(stmt) stmt) {
 }
 
 void N(retransaction)(T self) {
-	if((self->transaction_depth == 0) {
+	if(self->transaction_depth == 0) {
 		return;
 	}
 	N(release)(self);
@@ -181,21 +181,21 @@ void N(close)(T self) {
 
 	int attempt = 0;
 	for(;attempt<10;++attempt) {
-		int res = sqlite3_close(self->c);
+		int res = sqlite3_close(self->sqlite);
 		if(res == SQLITE_OK) {
 			free(self);
 			return;
 		}
 		record(WARNING, "sqlite close error %s %s",
-			   sqlite3_errstr(res), sqlite3_errmsg(self->c));
+			   sqlite3_errstr(res), sqlite3_errmsg(self->sqlite));
 		if(attempt > 1) {
 			sleep(attempt);
 		}
 		sqlite3_stmt* stmt = NULL;
-		while((stmt = sqlite3_next_stmt(self->c, stmt))) {
+		while((stmt = sqlite3_next_stmt(self->sqlite, stmt))) {
 			record(WARNING,
 				   "closing statement\n%s\n",sqlite3_sql(stmt));
-			check(sqlite3_finalize(stmt));
+			check(self, sqlite3_finalize(stmt));
 		}
 	}
 	record(ERROR,"could not close the database");
@@ -205,7 +205,7 @@ result N(load)(T db, N(result_handler) on_res, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	int ret = N(execmany)(db, on_res, sql);
+	int ret = N(execmany)(db, on_res, STRING(sql));
 	munmap((void*)sql.base, sql.len);
 	return check(db, ret);
 }
@@ -259,7 +259,7 @@ result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
 	
 result N(execmany)(T self, N(result_handler) on_res,
 						  string tail, bool finalize) {
-	sqlite3* c = self->c;
+	sqlite3* c = self->sqlite;
 	const char* next = NULL;
 	int i = 0;
 	struct N(stmt) stmt = {
@@ -271,7 +271,7 @@ result N(execmany)(T self, N(result_handler) on_res,
 			.base = tail.base,
 			.len = 0;
 		};
-		int res = sqlite3_prepare_v2(self->c,
+		int res = sqlite3_prepare_v2(self->sqlite,
 									 tail.base, tail.len,
 									 &stmt->sqlite,
 									 &next);
@@ -302,7 +302,7 @@ result N(execmany)(T self, N(result_handler) on_res,
 }
 
 N(stmt) N(prepare_str)(T self, string sql) {
-	sqlite3* c = self->c;
+	sqlite3* c = self->sqlite;
 	sqlite3_stmt* stmt = prepare(c, sql);
 
 	N(stmt) dbstmt = calloc(1, sizeof(*dbstmt));
@@ -328,12 +328,12 @@ void N(finalize)(N(stmt) stmt) {
 }
 
 ident N(lastrow)(T self) {
-	return sqlite3_last_insert_rowid(self->c);
+	return sqlite3_last_insert_rowid(self->sqlite);
 }
 
 bool N(has_table_str)(T self, const char* table, size_t n) {
 	if(!self->has_table) {
-		self->has_table = prepare(self->c,
+		self->has_table = prepare(self->sqlite,
 								LITSTR("SELECT 1 FROM sqlite_master "
 									   "WHERE type='table' AND name=?"));
 	}

@@ -1,4 +1,4 @@
-result OPERATION(T self, result_handler on_res, string tail) {
+result OPERATION(T self, N(result_handler) on_res, string tail) {
 	sqlite3* c = self->c;
 	const char* next = NULL;
 	int i = 0;
