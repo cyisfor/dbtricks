@@ -121,22 +121,22 @@ int full_commit(T db) {
 }
 
 static
-enum N(state) check(T db, int res);
+result check(T db, int res);
 
 EXPORT
 void N(full_commit)(T self) {
 	check(self, full_commit(self));
 }
 
-enum N(state) check(T db, int res)
+result check(T db, int res)
 {
 	switch(res) {
 	case SQLITE_OK:
-		return BASEDB_OK;
+		return succeed;
 	case SQLITE_ROW:
-		return BASEDB_ROW;		
+		return succeed;		
 	case SQLITE_DONE:
-		return BASEDB_DONE;
+		return done;
 	};
 	if(db->transaction_depth > 0) {
 		int res = release(db);
@@ -147,7 +147,7 @@ enum N(state) check(T db, int res)
 	}
 	record(ERROR, "sqlite error %s (%s)\n",
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
-	return BASEDB_ERROR;
+	return fail;
 }
 
 void N(once)(N(stmt) stmt) {
@@ -195,16 +195,16 @@ void N(close)(T self) {
 	record(ERROR,"could not close the database");
 }
 
-enum N(state) N(load)(T db, N(result_handler) on_res, const char* path) {
+result N(load)(T db, N(result_handler) on_res, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
 	int ret = N(execmany)(db, on_res, sql);
 	munmap((void*)sql.base, sql.len);
-	return ret == SQLITE_OK ? BASEDB_OK : BASEDB_ERROR;
+	return check(db, ret);
 }
 
-enum N(state) N(exec_str)(T db, string sql) {
+result N(exec_str)(T db, string sql) {
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
 	int res = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
@@ -242,7 +242,7 @@ enum N(state) N(exec_str)(T db, string sql) {
 #include "domany.snippet.h"
 
 result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
-								 const char* path) {
+										const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
@@ -251,7 +251,8 @@ result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
 	return ret;
 }
 	
-result N(execmany)(T self, N(result_handler) on_res, string tail, bool finalize) {
+result N(execmany)(T self, N(result_handler) on_res,
+						  string tail, bool finalize) {
 	sqlite3* c = self->c;
 	const char* next = NULL;
 	int i = 0;

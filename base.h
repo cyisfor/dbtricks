@@ -11,13 +11,6 @@
 struct T;
 typedef struct T *T;
 
-enum N(state) {
-	BASEDB_ERROR,
-		BASEDB_OK,
-		BASEDB_ROW,
-		BASEDB_DONE
-		};
-
 struct N(open)_params {
 	const char* path;
 	bool readonly;
@@ -37,7 +30,7 @@ N(stmt) N(prepare)_str(string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
 void N(once)(N(stmt) stmt);
-enum N(state) N(step)(N(stmt) stmt);
+result N(step)(N(stmt) stmt);
 size_t N(stmt)_changes(N(stmt) stmt);
 
 static int N(change)(N(stmt) stmt) {
@@ -47,22 +40,22 @@ static int N(change)(N(stmt) stmt) {
 }
 
 #define N(exec)(db, lit) N(exec)_str(db, LITSTR(lit))
-enum N(state) N(exec)_str(T db, string sql);
+result N(exec)_str(T db, string sql);
 
 #define RESULT_HANDLER(name) \
-	bool name(enum N(state) res, int n, N(stmt) stmt, string sql, string tail)
+	bool name(result res, int n, N(stmt) stmt, string sql, string tail)
 
 #define PREPARE_HANDLER(name) \
-	bool name(enum N(state) res, int n, N(stmt) stmt, string name, string sql, string tail)
+	bool name(result res, int n, N(stmt) stmt, string name, string sql, string tail)
 
 typedef RESULT_HANDLER((*N(result_handler)));
 typedef PREPARE_HANDLER((*N(prepare_handler)));
 
-enum N(state) N(execmany)(T db, N(result_handler) on_err, string sql);
-enum N(state) N(preparemany)(T public, N(prepare_handler) on_res, string sql);
+result N(execmany)(T db, N(result_handler) on_err, string sql);
+result N(preparemany)(T public, N(prepare_handler) on_res, string sql);
 
-enum N(state) N(load)(T db, N(result_handler) on_res, const char* path);
-enum N(state) N(preparemany)_from_file(T public, N(prepare_handler) on_res,
+result N(load)(T db, N(result_handler) on_res, const char* path);
+result N(preparemany)_from_file(T public, N(prepare_handler) on_res,
 								const char* path);
 
 identifer N(lastrow)(T db);
