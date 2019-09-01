@@ -1,75 +1,82 @@
 #include "result.h"
 #include "mystring.h"
-
+#include "myint.h" // identifier
+#include "concatsym.h"
 #include <stdlib.h> // size_t
 #include <stdbool.h>
 
-typedef uint64_t identifier;
+#define N(a) CONCATSYM(basedb_, a)
+#define T basedb
 
-struct db {
+struct T {
 	int dberr;
 };
-typedef struct db *db;
+typedef struct T *T;
 
-struct db_open_params {
+struct N(open)_params {
 	const char* path;
 	bool readonly;
 };
-db db_open_f(struct db_open_params);
-#define db_open(...) ({									\
-		struct db_open_params params = {__VA_ARGS__};	\
-		db_open_f(params);								\
+T N(open)_f(struct N(open)_params);
+#define basedb_open(...) ({								\
+		struct N(open)_params params = {__VA_ARGS__};	\
+		N(open)_f(params);								\
 	})
-void db_close(db db);
-size_t db_stmt_changes(db db);
+void N(close)(T db);
+size_t N(stmt)_changes(T db);
 
-typedef struct db_stmt *db_stmt;
+typedef struct N(stmt) *N(stmt);
 
-#define db_prepare(lit) db_prepare_str(LITSTR(lit));
-db_stmt db_prepare_str(string sql);
-void db_reset(db_stmt stmt);
-void db_finalize(db_stmt stmt);
-void db_once(db_stmt stmt);
-int db_step(db_stmt stmt);
-size_t db_stmt_changes(db_stmt stmt);
+#define N(prepare)(lit) N(prepare)_str(LITSTR(lit));
+N(stmt) N(prepare)_str(string sql);
+void N(reset)(N(stmt) stmt);
+void N(finalize)(N(stmt) stmt);
+void N(once)(N(stmt) stmt);
+int N(step)(N(stmt) stmt);
+size_t N(stmt)_changes(N(stmt) stmt);
 
-static int db_change(db_stmt stmt) {
+static int N(change)(N(stmt) stmt) {
 /* insert, update or delete */
-	ensure_eq(SQLITE_DONE, db_step(stmt));
-	return db_stmt_changes(stmt);
+	ensure_eq(SQLITE_DONE, N(step)(stmt));
+	return N(stmt)_changes(stmt);
 }
 
-int db_check(int res);
+int N(check)(int res);
 
-#define db_exec(db, lit) db_exec_str(db, LITSTR(lit))
-int db_exec_str(db db, string sql);
+#define N(exec)(db, lit) N(exec)_str(db, LITSTR(lit))
+int N(exec)_str(T db, string sql);
 
 #define RESULT_HANDLER(name) \
-	bool name(int res, int n, db_stmt stmt, string sql, string tail)
+	bool name(int res, int n, N(stmt) stmt, string sql, string tail)
 
-typedef RESULT_HANDLER((*result_handler));
+#define PREPARE_HANDLER(name) \
+	bool name(int res, int n, N(stmt) stmt, string name, string sql, string tail)
 
-result db_execmany(db db, result_handler on_err, string sql);
-result db_preparemany(db public, prepare_handler on_res, string sql);
+typedef RESULT_HANDLER((*N(result_handler)));
+typedef PREPARE_HANDLER((*N(prepare_handler)));
 
-result db_load(db db, result_handler on_res, const char* path);
-result db_preparemany_from_file(db public, prepare_handler on_res,
+result N(execmany)(T db, N(result_handler) on_err, string sql);
+result N(preparemany)(T public, N(prepare_handler) on_res, string sql);
+
+result N(load)(T db, N(result_handler) on_res, const char* path);
+result N(preparemany)_from_file(T public, N(prepare_handler) on_res,
 								const char* path);
 
-identifer db_lastrow(db db);
+identifer N(lastrow)(T db);
 
-void db_savepoint(db db);
-void db_release(db db);
-void db_rollback(db db);
-void db_retransaction(db db);
+void N(savepoint)(T db);
+void N(release)(T db);
+void N(rollback)(T db);
+void N(retransaction)(T db);
 
 #include "defer.h"
 
-#define TRANSACTION(db) db_savepoint(db); DEFER { db_release(db) }
+#define TRANSACTION(db) N(savepoint)(db); DEFER { N(release)(db) }
 
-bool db_has_table_str(db db, string table_name);
-#define db_has_table(db, lit) db_has_table_str(db, LITSTR(lit))
+bool N(has_table_str)(T db, string table_name);
+#define basedb_table(db, lit) N(has_table_str)(db, LITSTR(lit))
 
-#include "db_all_types.snippet.h"
-ownable_string db_column_string(db db, int col);
-#define db_column_identifier db_column_int64
+#include "all_types.snippet.h"
+#include "db_types.snippet.h"
+ownable_string N(column_string)(T db, int col);
+#define basedb_column_identifier N(column_int64)
