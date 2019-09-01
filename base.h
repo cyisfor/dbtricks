@@ -30,8 +30,8 @@ T N(open_f)(struct N(open_params));
 void N(close)(T db);
 size_t N(stmt_changes)(N(stmt) db);
 
-#define basedb_prepare(lit) N(prepare_str)(LITSTR(lit));
-N(stmt) N(prepare_str)(string sql);
+#define basedb_prepare(db, lit) N(prepare_str)(db, LITSTR(lit));
+N(stmt) N(prepare_str)(T db, string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
 void N(once)(N(stmt) stmt);
@@ -47,8 +47,8 @@ result N(exec_str)(T db, string sql);
 #define RESULT_HANDLER(name) \
 	bool name(result res, int n, N(stmt) stmt, string sql, string tail)
 
-#define PREPARE_HANDLER(name) \
-	bool name(result res, int n, N(stmt) stmt, string name, string sql, string tail)
+#define PREPARE_HANDLER(funcname) \
+	bool funcname(result res, int n, N(stmt) stmt, string name, string sql, string tail)
 
 typedef RESULT_HANDLER((*N(result_handler)));
 typedef PREPARE_HANDLER((*N(prepare_handler)));

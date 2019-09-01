@@ -87,8 +87,6 @@ T N(open_f)(struct N(open_params) params) {
 static
 result check(T db, int res);
 
-
-
 #define FUNCNAME base_rollback
 #define FULL_COMMIT rollback
 #define COMMIT_PREFIX "ROLLBACK TO s"
@@ -232,10 +230,10 @@ result N(exec_str)(T db, string sql) {
 #define START_OPERATION string name;
 #define HANDLE_STATEMENT(stmt)
 #define HANDLE_EXTRA(tail) {										\
-		const char* newline = memchr(tail.base, '\n', tail.len);	\
+		const byte* newline = memchr(tail.base, '\n', tail.len);	\
 		if(!newline) {												\
 			/* no more */											\
-			return success;											\
+			return succeed;											\
 		}															\
 		name.base = tail.base;										\
 		name.len = (newline - tail.base);							\
@@ -252,55 +250,11 @@ result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	result ret = N(preparemany)(self, on_res, sql);
+	result ret = N(preparemany)(self, on_res, STRING(sql));
 	munmap((void*)sql.base, sql.len);
 	return ret;
 }
 	
-result N(execmany)(T self, N(result_handler) on_res,
-						  string tail, bool finalize) {
-	sqlite3* c = self->sqlite;
-	const char* next = NULL;
-	int i = 0;
-	struct N(stmt) stmt = {
-		.db = self;
-		.sqlite = NULL;
-	};
-	for(;;++i) {
-		string cur = {
-			.base = tail.base,
-			.len = 0;
-		};
-		int res = sqlite3_prepare_v2(self->sqlite,
-									 tail.base, tail.len,
-									 &stmt->sqlite,
-									 &next);
-#define CHECK															\
-		if(res != SQLITE_OK) {											\
-			if(on_res) {												\
-				return on_res(res,i,&stmt,cur, sql);					\
-			}															\
-			return fail;												\
-		}
-		CHECK;
-		if(stmt == NULL) return true; // just trailing comments, whitespace
-		if(next != NULL) {
-			cur.len = next - tail.base;
-			tail.len -= cur.len;
-			tail.base = next;
-		}
-		res = sqlite3_step(stmt);
-		CHECK;
-		res = sqlite3_finalize(stmt);
-		CHECK;
-		if(on_res) {
-			if(fail == on_res(res,i,&stmt,cur,sql)) return fail;
-		}
-		if(next == NULL)
-			return succeed;
-	}
-}
-
 N(stmt) N(prepare_str)(T self, string sql) {
 	sqlite3* c = self->sqlite;
 	sqlite3_stmt* stmt = prepare(c, sql);
@@ -311,7 +265,7 @@ N(stmt) N(prepare_str)(T self, string sql) {
 	return dbstmt;
 }
 
-int N(step)(N(stmt) stmt) {
+result N(step)(N(stmt) stmt) {
 	if(stmt->db->error) {
 		record(ERROR, "tried to do something without rolling back!");
 	}
@@ -327,17 +281,17 @@ void N(finalize)(N(stmt) stmt) {
 	free(stmt);
 }
 
-ident N(lastrow)(T self) {
+identifier N(lastrow)(T self) {
 	return sqlite3_last_insert_rowid(self->sqlite);
 }
 
-bool N(has_table_str)(T self, const char* table, size_t n) {
+bool N(has_table_str)(T self, string table_name) {
 	if(!self->has_table) {
 		self->has_table = prepare(self->sqlite,
 								LITSTR("SELECT 1 FROM sqlite_master "
 									   "WHERE type='table' AND name=?"));
 	}
-	sqlite3_bind_text(self->has_table,1,table,n,NULL);
+	sqlite3_bind_text(self->has_table,1,table_name.base,table_name.len,NULL);
 	// can't use N(once) because we expect SQLITE_ROW
 	int res = check(self, sqlite3_step(self->has_table));
 	sqlite3_reset(db->has_table);

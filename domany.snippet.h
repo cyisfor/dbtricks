@@ -19,7 +19,7 @@ result OPERATION(T self, THING_HANDLER on_res, string tail) {
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				return CHECK_RESULT(res,i,&stmt,cur, tail);				\
+				return CHECK_RESULT(res,i,(&stmt),cur, tail);				\
 			}															\
 			return fail;												\
 		}
@@ -33,7 +33,7 @@ result OPERATION(T self, THING_HANDLER on_res, string tail) {
 		}
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
-			if(fail == CHECK_RESULT(res,i,&stmt,cur,tail)) return fail;
+			if(fail == CHECK_RESULT(res,i,(&stmt),cur,tail)) return fail;
 		}
 		if(next == NULL)
 			return succeed;
