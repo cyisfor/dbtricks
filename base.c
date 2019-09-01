@@ -13,34 +13,34 @@
 #include <unistd.h> // sleep
 
 struct dbpriv {
-	struct db public;
+	struct basedb public;
 	sqlite3* sqlite;
 	sqlite3_stmt *begin, *commit, *rollback;
 	sqlite3_stmt *has_table;
 	int transaction_depth;
 };
 
-typedef struct db_stmt {
+typedef struct N(stmt) {
 	struct dbpriv* db;
 	sqlite3_stmt* sqlite;
-} *db_stmt;
+} *N(stmt);
 
 typedef struct dbpriv* dbpriv;
 
 static
 sqlite3_stmt* prepare(sqlite3* c, string sql) {
 	sqlite3_stmt* stmt
-	const char* db_next = NULL;
+	const char* N(next) = NULL;
 	int res = sqlite3_prepare_v2(
 		c,
 		sql.base,
 		sql.len,
 		&stmt,
-		&db_next);
-	if(db_next && db_next - sql.base != sql.len) {
+		&N(next));
+	if(N(next) && N(next) - sql.base != sql.len) {
 		string tail = {
-			.base = db_next,
-			.len = sql.len - (db_next - sql.base)
+			.base = N(next),
+			.len = sql.len - (N(next) - sql.base)
 		};
 		record(WARNING, "some sql wouldn't prepare #.*s",
 			   STRING_FOR_PRINTF(tail));
@@ -67,11 +67,11 @@ db open_with_flags(const char* path, int flags) {
 	db->begin = prepare(db->sqlite, LITSTR("BEGIN"));
 	db->commit = prepare(db->sqlite, LITSTR("COMMIT"));
 	db->rollback = prepare(db->sqlite, LITSTR("ROLLBACK"));
-	DB_OK(db);
+	N(OK)(db);
 	return (db)db;
 }
 
-db db_open_f(struct db_params params) {
+db N(open_f)(struct N(params) params) {
 	return open_with_flags(params.path,
 						   params.readonly ?
 						   SQLITE_OPEN_READONLY :
@@ -81,7 +81,7 @@ db db_open_f(struct db_params params) {
 #define FUNCNAME base_rollback
 #define FULL_COMMIT rollback
 #define COMMIT_PREFIX "ROLLBACK TO s"
-#include "db_commity.snippet.h"
+#include "N(commity).snippet.h"
 
 int rollback(dbpriv db) {
 	db->error = 0;
@@ -91,7 +91,7 @@ int rollback(dbpriv db) {
 #define FUNCNAME base_release
 #define FULL_COMMIT commit
 #define COMMIT_PREFIX "RELEASE TO s"
-#include "db_commity.snippet.h"
+#include "N(commity).snippet.h"
 
 int release(dbpriv db) {
 	if(db->error) {
@@ -104,7 +104,7 @@ int release(dbpriv db) {
 #define FULL_COMMIT begin
 #define COMMIT_PREFIX "SAVEPOINT s"
 #define INCREMENT
-#include "db_commity.snippet.h"
+#include "N(commity).snippet.h"
 
 static
 int full_commit(dbpriv db) {
@@ -118,11 +118,11 @@ int full_commit(dbpriv db) {
 }
 
 EXPORT
-void db_full_commit(db db) {
-	db_check((dbpriv)db, full_commit((dbpriv)db));
+void N(full_commit)(db db) {
+	N(check)((dbpriv)db, full_commit((dbpriv)db));
 }
 
-int db_check(dbpriv db, int res)
+int N(check)(dbpriv db, int res)
 {
 	switch(res) {
 	case SQLITE_OK:
@@ -142,21 +142,21 @@ int db_check(dbpriv db, int res)
 	return res;
 }
 
-void db_once(db_stmt stmt) {
-	int res = db_check(stmt->db, sqlite3_step(stmt->sqlite));
+void N(once)(N(stmt) stmt) {
+	int res = N(check)(stmt->db, sqlite3_step(stmt->sqlite));
 	assert(res != SQLITE_ROW);
 	sqlite3_reset(stmt->sqlite);
 }
 
-void db_retransaction(db db) {
+void N(retransaction)(db db) {
 	if(((dbpriv)db)->transaction_level == 0) {
 		return;
 	}
-	db_release(db);
-	db_savepoint(db);
+	N(release)(db);
+	N(savepoint)(db);
 }
 
-void db_close(db db) {
+void N(close)(db db) {
 	dbpriv priv = (dbpriv)db;
 	if(priv->transaction_level > 0) {
 		full_commit(priv);
@@ -182,22 +182,22 @@ void db_close(db db) {
 		while((stmt = sqlite3_next_stmt(priv->c, stmt))) {
 			record(WARNING,
 				   "closing statement\n%s\n",sqlite3_sql(stmt));
-			db_check(sqlite3_finalize(stmt));
+			N(check)(sqlite3_finalize(stmt));
 		}
 	}
 	record(ERROR,"could not close the database");
 }
 
-result db_load(db db, result_handler on_res, const char* path) {
+result N(load)(db db, result_handler on_res, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	result ret = db_execmany(db, on_res, sql);
+	result ret = N(execmany)(db, on_res, sql);
 	munmap((void*)sql.base, sql.len);
 	return ret;
 }
 
-int db_exec_str(db db, string sql) {
+int N(exec_str)(db db, string sql) {
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
 	int res = sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
@@ -211,7 +211,7 @@ int db_exec_str(db db, string sql) {
 	res = sqlite3_finalize(stmt);				\
 	CHECK;
 #define HANDLE_EXTRA(tail)
-#define OPERATION db_execmany
+#define OPERATION N(execmany)
 #define CHECK_RESULT on_res
 #define THING_HANDLER result_handler
 #include "domany.snippet.h"
@@ -229,28 +229,28 @@ int db_exec_str(db db, string sql) {
 		tail.base += name.len + 1;									\
 		tail.len -= name.len + 1;									\
 	}
-#define OPERATION db_preparemany
+#define OPERATION N(preparemany)
 #define CHECK_RESULT(res,i,stmt,cur,sql) on_res(res,i,stmt,name,cur,tail)
 #define THING_HANDLER prepare_handler
 #include "domany.snippet.h"
 
-result db_prepare_many_from_file(db public, prepare_handler on_res,
+result N(prepare_many_from_file)(db public, prepare_handler on_res,
 								 const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	result ret = db_preparemany(db, on_res, sql);
+	result ret = N(preparemany)(db, on_res, sql);
 	munmap((void*)sql.base, sql.len);
 	return ret;
 }
 	
-result db_execmany(db public, result_handler on_res, string tail, bool finalize) {
+result N(execmany)(db public, result_handler on_res, string tail, bool finalize) {
 	dbpriv priv = (dbpriv)public;
 	sqlite3* c = priv->c;
-	db_stmt stmt = NULL;
+	N(stmt) stmt = NULL;
 	const char* next = NULL;
 	int i = 0;
-	struct db_stmt dbstmt = {
+	struct N(stmt) dbstmt = {
 		.db = priv;
 		.sqlite = NULL;
 	};
@@ -291,36 +291,36 @@ result db_execmany(db public, result_handler on_res, string tail, bool finalize)
 	}
 }
 
-db_stmt db_prepare_str(db public, string sql) {
+N(stmt) N(prepare_str)(db public, string sql) {
 	sqlite3* c = ((dbpriv)public)->c;
 	sqlite3_stmt* stmt = prepare(c, sql);
 
-	db_stmt dbstmt = calloc(1, sizeof(*dbstmt));
+	N(stmt) dbstmt = calloc(1, sizeof(*dbstmt));
 	dbstmt->sqlite = stmt;
 	dbstmt->db = (dbpriv)public;
 	return dbstmt;
 }
 
-int db_step(db_stmt stmt) {
+int N(step)(N(stmt) stmt) {
 	if(stmt->db->error) {
 		record(ERROR, "tried to do something without rolling back!");
 	}
-	return db_check(stmt->db, sqlite3_step(stmt->sqlite));
+	return N(check)(stmt->db, sqlite3_step(stmt->sqlite));
 }
 
-void db_reset(db_stmt stmt) {
-	db_check(stmt->db,sqlite3_reset(stmt->sqlite));
+void N(reset)(N(stmt) stmt) {
+	N(check)(stmt->db,sqlite3_reset(stmt->sqlite));
 }
-void db_finalize(db_stmt stmt) {
-	db_check(stmt->db,sqlite3_finalize(stmt->sqlite));
+void N(finalize)(N(stmt) stmt) {
+	N(check)(stmt->db,sqlite3_finalize(stmt->sqlite));
 	free(stmt);
 }
 
-ident db_lastrow(db db) {
+ident N(lastrow)(db db) {
 	return sqlite3_last_insert_rowid(((dbpriv)db)->c);
 }
 
-bool db_has_table_str(db db, const char* table, size_t n) {
+bool N(has_table_str)(db db, const char* table, size_t n) {
 	dbpriv priv = (dbpriv)db;
 	if(!db->has_table) {
 		db->has_table = prepare(priv->c,
@@ -328,24 +328,24 @@ bool db_has_table_str(db db, const char* table, size_t n) {
 									   "WHERE type='table' AND name=?"));
 	}
 	sqlite3_bind_text(db->has_table,1,table,n,NULL);
-	// can't use db_once because we expect SQLITE_ROW
-	int res = db_check(priv, sqlite3_step(db->has_table));
+	// can't use N(once) because we expect SQLITE_ROW
+	int res = N(check)(priv, sqlite3_step(db->has_table));
 	sqlite3_reset(db->has_table);
 	return res == SQLITE_ROW;
 }
 
-size_t db_stmt_changes(db_stmt stmt) {
+size_t N(stmt_changes)(N(stmt) stmt) {
 	return sqlite3_changes(stmt->db->sqlite);
 }
 
-size_t db_total_changes(db db) {
+size_t N(total_changes)(db db) {
 	return sqlite3_total_changes(((dbpriv)db)->sqlite);
 }
 
 #define IMPLEMENTATION
 #include "all_types.snippet.h"
 
-string db_column_string(db_stmt stmt, int col) {
+string N(column_string)(N(stmt) stmt, int col) {
 	string ret = {
 		.base = sqlite3_column_blob(stmt->sqlite),
 		.len = sqlite3_column_bytes(stmt->sqlite)
