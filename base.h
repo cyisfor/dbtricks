@@ -77,3 +77,6 @@ bool N(has_table_str)(T db, string table_name);
 #include "all_types.snippet.h"
 ownable_string N(column_string)(T db, int col);
 #define basedb_column_identifier N(column_int64)
+
+#undef N
+#undef T
