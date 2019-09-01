@@ -1,3 +1,4 @@
+#include "ensure.h"
 #include "result.h"
 #include "mystring.h"
 #include "myint.h" // identifier
@@ -10,6 +11,7 @@
 
 struct T;
 typedef struct T *T;
+typedef struct N(stmt) *N(stmt);
 
 struct N(open_params) {
 	const char* path;
@@ -21,11 +23,9 @@ T N(open_f)(struct N(open_params));
 		N(open_f)(params);								\
 	})
 void N(close)(T db);
-size_t N(stmt_changes)(T db);
+size_t N(stmt_changes)(N(stmt) db);
 
-typedef struct N(stmt) *N(stmt);
-
-#define N(prepare)(lit) N(prepare_str)(LITSTR(lit));
+#define basedb_prepare(lit) N(prepare_str)(LITSTR(lit));
 N(stmt) N(prepare_str)(string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
@@ -39,7 +39,7 @@ static int N(change)(N(stmt) stmt) {
 	return N(stmt_changes)(stmt);
 }
 
-#define N(exec)(db, lit) N(exec_str)(db, LITSTR(lit))
+#define basedb_exec(db, lit) N(exec_str)(db, LITSTR(lit))
 result N(exec_str)(T db, string sql);
 
 #define RESULT_HANDLER(name) \
