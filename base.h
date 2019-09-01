@@ -1,3 +1,6 @@
+#ifndef BASE_H
+#define BASE_H
+
 #include "ensure.h"
 #include "result.h"
 #include "mystring.h"
@@ -33,11 +36,8 @@ void N(once)(N(stmt) stmt);
 result N(step)(N(stmt) stmt);
 size_t N(stmt_changes)(N(stmt) stmt);
 
-static int N(change)(N(stmt) stmt) {
+int N(change)(N(stmt) stmt);
 /* insert, update or delete */
-	ensure_eq(SQLITE_DONE, N(step)(stmt));
-	return N(stmt_changes)(stmt);
-}
 
 #define basedb_exec(db, lit) N(exec_str)(db, LITSTR(lit))
 result N(exec_str)(T db, string sql);
@@ -58,7 +58,7 @@ result N(load)(T db, N(result_handler) on_res, const char* path);
 result N(preparemany_from_file)(T public, N(prepare_handler) on_res,
 								const char* path);
 
-identifer N(lastrow)(T db);
+identifier N(lastrow)(T db);
 
 void N(savepoint)(T db);
 void N(release)(T db);
@@ -78,3 +78,6 @@ ownable_string N(column_string)(T db, int col);
 
 #undef N
 #undef T
+
+
+#endif /* BASE_H */

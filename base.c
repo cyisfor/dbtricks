@@ -342,6 +342,12 @@ size_t N(stmt_changes)(N(stmt) stmt) {
 	return sqlite3_changes(stmt->db->sqlite);
 }
 
+int N(change)(N(stmt) stmt) {
+/* insert, update or delete */
+	ensure_eq(SQLITE_DONE, N(step)(stmt));
+	return N(stmt_changes)(stmt);
+}
+
 size_t N(total_changes)(T self) {
 	return sqlite3_total_changes(self->sqlite);
 }
