@@ -11,36 +11,36 @@
 struct T;
 typedef struct T *T;
 
-struct N(open)_params {
+struct N(open_params) {
 	const char* path;
 	bool readonly;
 };
-T N(open)_f(struct N(open)_params);
+T N(open_f)(struct N(open_params));
 #define basedb_open(...) ({								\
-		struct N(open)_params params = {__VA_ARGS__};	\
-		N(open)_f(params);								\
+		struct N(open_params) params = {__VA_ARGS__};	\
+		N(open_f)(params);								\
 	})
 void N(close)(T db);
-size_t N(stmt)_changes(T db);
+size_t N(stmt_changes)(T db);
 
 typedef struct N(stmt) *N(stmt);
 
-#define N(prepare)(lit) N(prepare)_str(LITSTR(lit));
-N(stmt) N(prepare)_str(string sql);
+#define N(prepare)(lit) N(prepare_str)(LITSTR(lit));
+N(stmt) N(prepare_str)(string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
 void N(once)(N(stmt) stmt);
 result N(step)(N(stmt) stmt);
-size_t N(stmt)_changes(N(stmt) stmt);
+size_t N(stmt_changes)(N(stmt) stmt);
 
 static int N(change)(N(stmt) stmt) {
 /* insert, update or delete */
 	ensure_eq(SQLITE_DONE, N(step)(stmt));
-	return N(stmt)_changes(stmt);
+	return N(stmt_changes)(stmt);
 }
 
-#define N(exec)(db, lit) N(exec)_str(db, LITSTR(lit))
-result N(exec)_str(T db, string sql);
+#define N(exec)(db, lit) N(exec_str)(db, LITSTR(lit))
+result N(exec_str)(T db, string sql);
 
 #define RESULT_HANDLER(name) \
 	bool name(result res, int n, N(stmt) stmt, string sql, string tail)
@@ -55,7 +55,7 @@ result N(execmany)(T db, N(result_handler) on_err, string sql);
 result N(preparemany)(T public, N(prepare_handler) on_res, string sql);
 
 result N(load)(T db, N(result_handler) on_res, const char* path);
-result N(preparemany)_from_file(T public, N(prepare_handler) on_res,
+result N(preparemany_from_file)(T public, N(prepare_handler) on_res,
 								const char* path);
 
 identifer N(lastrow)(T db);
