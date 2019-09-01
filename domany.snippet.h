@@ -1,4 +1,4 @@
-result OPERATION(T self, N(result_handler) on_res, string tail) {
+result OPERATION(T self, THING_HANDLER on_res, string tail) {
 	sqlite3* c = self->sqlite;
 	const byte* next = NULL;
 	int i = 0;
@@ -6,6 +6,7 @@ result OPERATION(T self, N(result_handler) on_res, string tail) {
 		.db = self,
 		.sqlite = NULL
 	};
+	START_OPERATION;
 	for(;;++i) {
 		string cur = {
 			.base = tail.base,
@@ -18,7 +19,7 @@ result OPERATION(T self, N(result_handler) on_res, string tail) {
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				return on_res(res,i,&stmt,cur, tail);					\
+				return CHECK_RESULT(res,i,&stmt,cur, tail);				\
 			}															\
 			return fail;												\
 		}
@@ -32,10 +33,16 @@ result OPERATION(T self, N(result_handler) on_res, string tail) {
 		}
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
-			if(fail == on_res(res,i,&stmt,cur,tail)) return fail;
+			if(fail == CHECK_RESULT(res,i,&stmt,cur,tail)) return fail;
 		}
 		if(next == NULL)
 			return succeed;
 		HANDLE_EXTRA(tail);
 	}
 }
+#undef START_OPERATION
+#undef OPERATION
+#undef HANDLE_EXTRA
+#undef HANDLE_STATEMENT
+#undef CHECK_RESULT
+#undef THING_HANDLER
