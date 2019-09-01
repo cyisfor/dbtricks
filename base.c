@@ -24,6 +24,7 @@ struct T {
 	sqlite3_stmt *begin, *commit, *rollback;
 	sqlite3_stmt *has_table;
 	int transaction_depth;
+	int error;
 };
 
 typedef struct N(stmt) {
@@ -83,6 +84,11 @@ T N(open_f)(struct N(open_params) params) {
 						   (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE));
 }
 
+static
+result check(T db, int res);
+
+
+
 #define FUNCNAME base_rollback
 #define FULL_COMMIT rollback
 #define COMMIT_PREFIX "ROLLBACK TO s"
@@ -113,17 +119,14 @@ int release(T db) {
 
 static
 int full_commit(T db) {
-	if(db->transaction_level == 0) {
+	if(db->transaction_depth == 0) {
 		record(ERROR, "No transaction, so why are we committing?");
 	}
 	int res = sqlite3_step(db->commit);
 	sqlite3_reset(db->commit);
-	db->transaction_level = 0;
+	db->transaction_depth = 0;
 	return res;
 }
-
-static
-result check(T db, int res);
 
 EXPORT
 void N(full_commit)(T self) {
@@ -144,9 +147,10 @@ result check(T db, int res)
 		int res = release(db);
 		if(res != SQLITE_DONE) {
 			record(WARNING, "Couldn't release! %d %s", res,
-				   sqlite3_errmsg(res));
+				   sqlite3_errstr(res));
 		}
 	}
+	db->error = res;
 	record(ERROR, "sqlite error %s (%s)\n",
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
 	return fail;
@@ -159,7 +163,7 @@ void N(once)(N(stmt) stmt) {
 }
 
 void N(retransaction)(T self) {
-	if((self->transaction_level == 0) {
+	if((self->transaction_depth == 0) {
 		return;
 	}
 	N(release)(self);
@@ -167,7 +171,7 @@ void N(retransaction)(T self) {
 }
 
 void N(close)(T self) {
-	if(self->transaction_level > 0) {
+	if(self->transaction_depth > 0) {
 		full_commit(self);
 	}
 

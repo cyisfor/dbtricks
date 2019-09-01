@@ -47,10 +47,10 @@ int FUNCNAME(T db) {
 }
 
 EXPORT
-void CONCATSYM(db_, FUNCNAME)(T self) {
-	db_check(self, FUNCNAME(self));
+void CONCATSYM(basedb_, FUNCNAME)(T self) {
+	check(self, FUNCNAME(self));
 }
-/* defines db_release, db_savepoint, db_rollback */
+/* defines basedb_release, basedb_savepoint, basedb_rollback */
 
 #undef FUNCNAME
 #undef FULL_COMMIT
