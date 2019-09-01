@@ -119,18 +119,23 @@ int full_commit(T db) {
 	return res;
 }
 
+static
+enum N(state) check(T db, int res);
+
 EXPORT
-void N(full_commit)(db db) {
-	N(check)((T)db, full_commit((T)db));
+void N(full_commit)(T self) {
+	check(self, full_commit(self));
 }
 
-int N(check)(T db, int res)
+enum N(state) check(T db, int res)
 {
 	switch(res) {
 	case SQLITE_OK:
+		return BASEDB_OK;
 	case SQLITE_ROW:
+		return BASEDB_ROW;		
 	case SQLITE_DONE:
-		return res;
+		return BASEDB_DONE;
 	};
 	if(db->transaction_depth > 0) {
 		int res = release(db);
@@ -141,11 +146,11 @@ int N(check)(T db, int res)
 	}
 	record(ERROR, "sqlite error %s (%s)\n",
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
-	return res;
+	return BASEDB_ERROR;
 }
 
 void N(once)(N(stmt) stmt) {
-	int res = N(check)(stmt->db, sqlite3_step(stmt->sqlite));
+	int res = check(stmt->db, sqlite3_step(stmt->sqlite));
 	assert(res != SQLITE_ROW);
 	sqlite3_reset(stmt->sqlite);
 }
@@ -184,7 +189,7 @@ void N(close)(db db) {
 		while((stmt = sqlite3_next_stmt(priv->c, stmt))) {
 			record(WARNING,
 				   "closing statement\n%s\n",sqlite3_sql(stmt));
-			N(check)(sqlite3_finalize(stmt));
+			check(sqlite3_finalize(stmt));
 		}
 	}
 	record(ERROR,"could not close the database");
@@ -266,7 +271,6 @@ result N(execmany)(T self, N(result_handler) on_res, string tail, bool finalize)
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				stmt.sqlite = stmt;									\
 				return on_res(res,i,&stmt,cur, sql);					\
 			}															\
 			return fail;												\
@@ -304,15 +308,15 @@ int N(step)(N(stmt) stmt) {
 	if(stmt->db->error) {
 		record(ERROR, "tried to do something without rolling back!");
 	}
-	return N(check)(stmt->db, sqlite3_step(stmt->sqlite));
+	return check(stmt->db, sqlite3_step(stmt->sqlite));
 }
 
 void N(reset)(N(stmt) stmt) {
-	N(check)(stmt->db,sqlite3_reset(stmt->sqlite));
+	check(stmt->db,sqlite3_reset(stmt->sqlite));
 }
 
 void N(finalize)(N(stmt) stmt) {
-	N(check)(stmt->db,sqlite3_finalize(stmt->sqlite));
+	check(stmt->db,sqlite3_finalize(stmt->sqlite));
 	free(stmt);
 }
 
@@ -328,7 +332,7 @@ bool N(has_table_str)(T self, const char* table, size_t n) {
 	}
 	sqlite3_bind_text(self->has_table,1,table,n,NULL);
 	// can't use N(once) because we expect SQLITE_ROW
-	int res = N(check)(self, sqlite3_step(self->has_table));
+	int res = check(self, sqlite3_step(self->has_table));
 	sqlite3_reset(db->has_table);
 	return res == SQLITE_ROW;
 }
