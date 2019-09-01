@@ -29,7 +29,7 @@ int FUNCNAME(T db) {
 		.len = LITSIZ(COMMIT_PREFIX) + itoa(
 			buf+LITSIZ(COMMIT_PREFIX),
 			0x100-LITSIZ(COMMIT_PREFIX),
-			db->transaction_depth);
+			db->transaction_depth)
 	};
 
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
@@ -41,7 +41,7 @@ int FUNCNAME(T db) {
 		}	
 	} else {
 		record(ERROR, "Could not prepare " STRIFY(COMMIT_PREFIX) " %s",
-			   sqlite3_errmsg(res));
+			   sqlite3_errstr(res));
 	}
 	return res;
 }

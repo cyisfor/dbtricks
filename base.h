@@ -1,6 +1,8 @@
 #ifndef BASE_H
 #define BASE_H
 
+#include "export.h"
+
 #include "ensure.h"
 #include "result.h"
 #include "mystring.h"
