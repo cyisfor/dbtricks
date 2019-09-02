@@ -17,7 +17,7 @@ result OPERATION(T self, THING_HANDLER on_res, void* udata, string tail) {
 									 &stmt.sqlite,
 									 (const char**)&next);
 #define CHECK															\
-		if(res != SQLITE_OK) {											\
+		if(res != SQLITE_OK && res != SQLITE_DONE) {					\
 			if(on_res) {												\
 				return CHECK_RESULT(udata, check(self,res),				\
 									i,(&stmt),cur, tail);				\
@@ -34,7 +34,8 @@ result OPERATION(T self, THING_HANDLER on_res, void* udata, string tail) {
 		}
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
-			if(fail == CHECK_RESULT(udata, res,i,(&stmt),cur,tail)) return fail;
+			if(fail == CHECK_RESULT(udata, check(self,res),i,(&stmt),cur,tail))
+				return fail;
 		}
 		if(next == NULL)
 			return succeed;
