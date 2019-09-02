@@ -47,8 +47,8 @@ int FUNCNAME(T db) {
 }
 
 EXPORT
-void CONCATSYM(basedb_, FUNCNAME)(T self) {
-	check(self, FUNCNAME(self));
+result CONCATSYM(basedb_, FUNCNAME)(T self) {
+	return check(self, FUNCNAME(self));
 }
 /* defines basedb_release, basedb_savepoint, basedb_rollback */
 

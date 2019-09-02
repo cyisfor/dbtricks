@@ -142,8 +142,8 @@ result check(T db, int res) {
 		return done;
 	};
 	if(db->transaction_depth > 0) {
-		int res = release(db);
-		if(res != SQLITE_DONE) {
+		result res = base_release(db);
+		if(res != done) {
 			record(WARNING, "Couldn't release! %d %s", res,
 				   sqlite3_errstr(res));
 		}
@@ -160,12 +160,12 @@ void N(once)(N(stmt) stmt) {
 	sqlite3_reset(stmt->sqlite);
 }
 
-void N(retransaction)(T self) {
+result N(retransaction)(T self) {
 	if(self->transaction_depth == 0) {
-		return;
+		return succeed;
 	}
-	N(release)(self);
-	N(savepoint)(self);
+	ensure_ne(fail, N(release)(self));
+	return N(savepoint)(self);
 }
 
 void N(close)(T self) {
