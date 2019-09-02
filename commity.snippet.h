@@ -21,7 +21,7 @@ int FUNCNAME(T db) {
 		sqlite3_reset(db->FULL_COMMIT);
 		if(res == SQLITE_DONE)
 			db->transaction_depth = VALUE_FIRST;
-		return check(db, res);
+		return res;
 	}
 	char buf[0x100] = COMMIT_PREFIX;
 	string sql = {
@@ -43,7 +43,7 @@ int FUNCNAME(T db) {
 		record(ERROR, "Could not prepare " STRIFY(COMMIT_PREFIX) " %s",
 			   sqlite3_errstr(res));
 	}
-	return check(db, res);
+	return res;
 }
 
 EXPORT

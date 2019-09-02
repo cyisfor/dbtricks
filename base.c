@@ -107,9 +107,9 @@ result rollback(T db) {
 EXPORT
 result N(release)(T db) {
 	if(db->error) {
-		return rollback(db);
+		return check(db,rollback(db));
 	}
-	return base_release(db);
+	return check(db,base_release(db));
 }
 
 #define FUNCNAME savepoint
@@ -131,7 +131,7 @@ result full_commit(T db) {
 
 EXPORT
 result N(full_commit)(T self) {
-	return full_commit(self);
+	return check(self,full_commit(self));
 }
 
 result check(T db, int res) {
@@ -143,14 +143,16 @@ result check(T db, int res) {
 	case SQLITE_DONE:
 		return succeed;
 	};
+#if 0
 	if(db->transaction_depth > 0) {
-		result relres = base_release(db);
-		if(relres != succeed) {
+		int relres = base_release(db);
+		if(relres != SQLITE_DONE) {
 			record(WARNING, "Couldn't release! %d\n%s\n%s", relres,
 				   sqlite3_errstr(res),
 				   sqlite3_errmsg(db->sqlite));
 		}
 	}
+#endif
 	db->error = res;
 	record(ERROR, "sqlite error %d %s (%s)\n",
 		   res,
@@ -224,9 +226,9 @@ result N(exec_str)(T db, string sql) {
 
 #define START_OPERATION
 #define HANDLE_STATEMENT(stmt)					\
-	res = sqlite3_step(stmt.sqlite);					\
+	res = sqlite3_step(stmt.sqlite);			\
 	CHECK;										\
-	res = sqlite3_finalize(stmt.sqlite);				\
+	res = sqlite3_finalize(stmt.sqlite);		\
 	CHECK;
 #define HANDLE_EXTRA(tail)
 #define OPERATION N(execmany)
@@ -314,7 +316,8 @@ size_t N(stmt_changes)(N(stmt) stmt) {
 int N(change)(N(stmt) stmt) {
 /* insert, update or delete */
 	ensure_eq(succeed, N(step)(stmt));
-	return N(stmt_changes)(stmt);
+	int ret = N(stmt_changes)(stmt);
+	sqlite3_reset(stmt->sqlite);
 }
 
 size_t N(total_changes)(T self) {
