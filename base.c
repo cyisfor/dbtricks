@@ -144,14 +144,16 @@ result check(T db, int res) {
 		return succeed;
 	};
 	if(db->transaction_depth > 0) {
-		result res = base_release(db);
-		if(res != succeed) {
-			record(WARNING, "Couldn't release! %d %s", res,
-				   sqlite3_errstr(res));
+		result relres = base_release(db);
+		if(relres != succeed) {
+			record(WARNING, "Couldn't release! %d\n%s\n%s", relres,
+				   sqlite3_errstr(res),
+				   sqlite3_errmsg(db->sqlite));
 		}
 	}
 	db->error = res;
-	record(ERROR, "sqlite error %s (%s)\n",
+	record(ERROR, "sqlite error %d %s (%s)\n",
+		   res,
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
 	return fail;
 }
@@ -246,7 +248,7 @@ result N(exec_str)(T db, string sql) {
 		tail.len -= name.len + 1;									\
 	}
 #define OPERATION N(preparemany)
-#define CHECK_RESULT(res,i,stmt,cur,sql) on_res(res,i,stmt,name,cur,tail)
+#define CHECK_RESULT(udata,res,i,stmt,cur,sql) on_res(udata,res,i,stmt,name,cur,tail)
 #define THING_HANDLER N(prepare_handler)
 #include "domany.snippet.h"
 

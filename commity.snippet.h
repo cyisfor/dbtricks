@@ -21,7 +21,7 @@ int FUNCNAME(T db) {
 		sqlite3_reset(db->FULL_COMMIT);
 		if(res == SQLITE_DONE)
 			db->transaction_depth = VALUE_FIRST;
-		return res;
+		return check(db, res);
 	}
 	char buf[0x100] = COMMIT_PREFIX;
 	string sql = {

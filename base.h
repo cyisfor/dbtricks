@@ -53,7 +53,7 @@ result N(exec_str)(T db, string sql);
 typedef RESULT_HANDLER((*N(result_handler)));
 typedef PREPARE_HANDLER((*N(prepare_handler)));
 
-result N(execmany)(T db, N(result_handler) on_err, string sql);
+result N(execmany)(T db, N(result_handler) on_err, void* udata, string sql);
 result N(preparemany)(T public, N(prepare_handler) on_res, void* udata, string sql);
 
 result N(load)(T db, N(result_handler) on_res, void* udata, const char* path);

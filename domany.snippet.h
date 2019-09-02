@@ -19,7 +19,7 @@ result OPERATION(T self, THING_HANDLER on_res, void* udata, string tail) {
 #define CHECK															\
 		if(res != SQLITE_OK) {											\
 			if(on_res) {												\
-				return CHECK_RESULT(check(self,res),					\
+				return CHECK_RESULT(udata, check(self,res),				\
 									i,(&stmt),cur, tail);				\
 			}															\
 			return fail;												\
