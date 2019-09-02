@@ -53,8 +53,10 @@ sqlite3_stmt* prepare(sqlite3* c, string sql) {
 			   STRING_FOR_PRINTF(tail));
 	}
 	if(res != SQLITE_OK) {
-		record(ERROR, "preparing %.*s",
-			   STRING_FOR_PRINTF(sql));
+		record(ERROR, "preparing %.*s\n%s\n%s",
+			   STRING_FOR_PRINTF(sql),
+			sqlite3_errstr(res),
+			sqlite3_errmsg(c));
 	}
 	return stmt;
 }
@@ -202,11 +204,11 @@ void N(close)(T self) {
 	record(ERROR,"could not close the database");
 }
 
-result N(load)(T db, N(result_handler) on_res, const char* path) {
+result N(load)(T db, N(result_handler) on_res, void* udata, const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	int ret = N(execmany)(db, on_res, STRING(sql));
+	int ret = N(execmany)(db, on_res, udata, STRING(sql));
 	munmap((void*)sql.base, sql.len);
 	return check(db, ret);
 }
@@ -249,11 +251,12 @@ result N(exec_str)(T db, string sql) {
 #include "domany.snippet.h"
 
 result N(prepare_many_from_file)(T self, N(prepare_handler) on_res,
-										const char* path) {
+								 void* udata,
+								 const char* path) {
 	size_t len = 0;
 	ncstring sql = {};
 	sql.base = mmapfile(path,&sql.len);
-	result ret = N(preparemany)(self, on_res, STRING(sql));
+	result ret = N(preparemany)(self, on_res, udata, STRING(sql));
 	munmap((void*)sql.base, sql.len);
 	return ret;
 }

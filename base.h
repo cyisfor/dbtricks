@@ -45,20 +45,20 @@ int N(change)(N(stmt) stmt);
 result N(exec_str)(T db, string sql);
 
 #define RESULT_HANDLER(name) \
-	bool name(result res, int n, N(stmt) stmt, string sql, string tail)
+	bool name(void* udata, result res, int n, basedb_stmt stmt, string sql, string tail)
 
 #define PREPARE_HANDLER(funcname) \
-	bool funcname(result res, int n, N(stmt) stmt, string name, string sql, string tail)
+	bool funcname(void* udata, result res, int n, basedb_stmt stmt, string name, string sql, string tail)
 
 typedef RESULT_HANDLER((*N(result_handler)));
 typedef PREPARE_HANDLER((*N(prepare_handler)));
 
 result N(execmany)(T db, N(result_handler) on_err, string sql);
-result N(preparemany)(T public, N(prepare_handler) on_res, string sql);
+result N(preparemany)(T public, N(prepare_handler) on_res, void* udata, string sql);
 
-result N(load)(T db, N(result_handler) on_res, const char* path);
+result N(load)(T db, N(result_handler) on_res, void* udata, const char* path);
 result N(preparemany_from_file)(T public, N(prepare_handler) on_res,
-								const char* path);
+								void* udata, const char* path);
 
 identifier N(lastrow)(T db);
 
