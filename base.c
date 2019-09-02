@@ -176,7 +176,10 @@ void N(close)(T self) {
 	sqlite3_finalize(self->begin);
 	sqlite3_finalize(self->commit);
 	sqlite3_finalize(self->rollback);
-
+	if(self->has_table) {
+		sqlite3_finalize(self->has_table);
+		self->has_table = NULL;
+	}
 	int attempt = 0;
 	for(;attempt<10;++attempt) {
 		int res = sqlite3_close(self->sqlite);
@@ -293,8 +296,9 @@ bool N(has_table_str)(T self, string table_name) {
 	}
 	sqlite3_bind_text(self->has_table,1,table_name.base,table_name.len,NULL);
 	// can't use N(once) because we expect SQLITE_ROW
-	int res = check(self, sqlite3_step(self->has_table));
+	int res = sqlite3_step(self->has_table);
 	sqlite3_reset(self->has_table);
+	check(self, res);
 	return res == SQLITE_ROW;
 }
 
