@@ -11,8 +11,8 @@
 #define SQLITE_COL_NAME(TYPE) CONCATSYM(sqlite3_column_, TYPE)
 
 EXPORT
-int BIND_NAME(TYPE)(basedb_stmt stmt, int col, BIND_ARGS) {
-	return SQLITE_BIND_NAME(TYPE)(stmt->sqlite, col, BIND_PARAMS);
+result BIND_NAME(TYPE)(basedb_stmt stmt, int col, BIND_ARGS) {
+	return check(db, SQLITE_BIND_NAME(TYPE)(stmt->sqlite, col, BIND_PARAMS));
 }
 EXPORT
 COLUMN_RETURN COL_NAME(TYPE)(basedb_stmt stmt, int col) {
@@ -23,7 +23,7 @@ COLUMN_RETURN COL_NAME(TYPE)(basedb_stmt stmt, int col) {
 
 #else  /* IMPLEMENTATION */
 /* interface... */
-int BIND_NAME(TYPE)(basedb_stmt, int col, BIND_ARGS);
+result BIND_NAME(TYPE)(basedb_stmt, int col, BIND_ARGS);
 COLUMN_RETURN COL_NAME(TYPE)(basedb_stmt, int col);
 #endif
 #undef TYPE

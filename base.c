@@ -319,6 +319,12 @@ size_t N(total_changes)(T self) {
 #define IMPLEMENTATION
 #include "all_types.snippet.h"
 
+result N(bind_string)(N(stmt) stmt, int col, string value) {
+	return check(stmt->db,
+				 sqlite3_bind_blob(stmt->sqlite, col,
+								   value.base, value.len, NULL));
+}
+
 string N(column_string)(N(stmt) stmt, int col) {
 	string ret = {
 		.base = sqlite3_column_blob(stmt->sqlite, col),
