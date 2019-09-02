@@ -30,7 +30,7 @@ T N(open_f)(struct N(open_params));
 void N(close)(T db);
 size_t N(stmt_changes)(N(stmt) db);
 
-#define basedb_prepare(db, lit) N(prepare_str)(db, LITSTR(lit));
+#define basedb_prepare(db, ...) basedb_prepare_str(db, LITSTR(__VA_ARGS__));
 N(stmt) N(prepare_str)(T db, string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
