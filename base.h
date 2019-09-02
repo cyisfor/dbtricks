@@ -73,7 +73,7 @@ result N(retransaction)(T db);
 #define TRANSACTION(db) basedb_savepoint(db); DEFER { basedb_release(db); }
 
 bool N(has_table_str)(T db, string table_name);
-#define basedb_table(db, lit) basedb_has_table_str(db, LITSTR(lit))
+#define basedb_has_table(db, lit) basedb_has_table_str(db, LITSTR(lit))
 
 #include "all_types.snippet.h"
 string N(column_string)(N(stmt) stmt, int col);

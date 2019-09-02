@@ -139,11 +139,11 @@ result check(T db, int res) {
 	case SQLITE_ROW:
 		return succeed;		
 	case SQLITE_DONE:
-		return done;
+		return succeed;
 	};
 	if(db->transaction_depth > 0) {
 		result res = base_release(db);
-		if(res != done) {
+		if(res != succeed) {
 			record(WARNING, "Couldn't release! %d %s", res,
 				   sqlite3_errstr(res));
 		}
@@ -192,7 +192,7 @@ void N(close)(T self) {
 		sqlite3_stmt* stmt = NULL;
 		while((stmt = sqlite3_next_stmt(self->sqlite, stmt))) {
 			record(WARNING,
-				   "closing statement\n%s\n",sqlite3_sql(stmt));
+				   "force finalizing statement\n%s\n",sqlite3_sql(stmt));
 			check(self, sqlite3_finalize(stmt));
 		}
 	}
@@ -304,7 +304,7 @@ size_t N(stmt_changes)(N(stmt) stmt) {
 
 int N(change)(N(stmt) stmt) {
 /* insert, update or delete */
-	ensure_eq(SQLITE_DONE, N(step)(stmt));
+	ensure_eq(succeed, N(step)(stmt));
 	return N(stmt_changes)(stmt);
 }
 
