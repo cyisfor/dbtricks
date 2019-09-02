@@ -76,6 +76,7 @@ bool N(has_table_str)(T db, string table_name);
 #define basedb_has_table(db, lit) basedb_has_table_str(db, LITSTR(lit))
 
 #include "all_types.snippet.h"
+result N(bind_string)(N(stmt) stmt, int col, string value);
 string N(column_string)(N(stmt) stmt, int col);
 #define basedb_column_identifier N(column_int64)
 
