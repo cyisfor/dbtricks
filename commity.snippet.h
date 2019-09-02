@@ -43,7 +43,7 @@ int FUNCNAME(T db) {
 		record(ERROR, "Could not prepare " STRIFY(COMMIT_PREFIX) " %s",
 			   sqlite3_errstr(res));
 	}
-	return res;
+	return check(db, res);
 }
 
 EXPORT

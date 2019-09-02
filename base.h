@@ -24,8 +24,8 @@ struct N(open_params) {
 };
 T N(open_f)(struct N(open_params));
 #define basedb_open(...) ({								\
-		struct N(open_params) params = {__VA_ARGS__};	\
-		N(open_f)(params);								\
+		struct basedb_open_params params = {__VA_ARGS__};	\
+		basedb_open_f(params);									\
 	})
 void N(close)(T db);
 size_t N(stmt_changes)(N(stmt) db);
@@ -41,7 +41,7 @@ size_t N(stmt_changes)(N(stmt) stmt);
 int N(change)(N(stmt) stmt);
 /* insert, update or delete */
 
-#define basedb_exec(db, lit) N(exec_str)(db, LITSTR(lit))
+#define basedb_exec(db, lit) basedb_exec_str(db, LITSTR(lit))
 result N(exec_str)(T db, string sql);
 
 #define RESULT_HANDLER(name) \
@@ -62,14 +62,15 @@ result N(preparemany_from_file)(T public, N(prepare_handler) on_res,
 
 identifier N(lastrow)(T db);
 
-void N(savepoint)(T db);
-void N(release)(T db);
-void N(rollback)(T db);
-void N(retransaction)(T db);
+result N(savepoint)(T db);
+result N(release)(T db);
+result N(rollback)(T db);
+result N(full_commit)(T db);
+result N(retransaction)(T db);
 
 #include "defer.h"
 
-#define TRANSACTION(db) N(savepoint)(db); DEFER { N(release)(db) }
+#define TRANSACTION(db) N(savepoint)(db); DEFER { basedb_release(db); }
 
 bool N(has_table_str)(T db, string table_name);
 #define basedb_table(db, lit) N(has_table_str)(db, LITSTR(lit))

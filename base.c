@@ -92,7 +92,7 @@ result check(T db, int res);
 #define COMMIT_PREFIX "ROLLBACK TO s"
 #include "commity.snippet.h"
 
-int rollback(T db) {
+result rollback(T db) {
 	db->error = 0;
 	return base_rollback(db);
 }
@@ -102,7 +102,8 @@ int rollback(T db) {
 #define COMMIT_PREFIX "RELEASE TO s"
 #include "commity.snippet.h"
 
-int release(T db) {
+EXPORT
+result N(release)(T db) {
 	if(db->error) {
 		return rollback(db);
 	}
@@ -116,23 +117,22 @@ int release(T db) {
 #include "commity.snippet.h"
 
 static
-int full_commit(T db) {
+result full_commit(T db) {
 	if(db->transaction_depth == 0) {
 		record(ERROR, "No transaction, so why are we committing?");
 	}
 	int res = sqlite3_step(db->commit);
 	sqlite3_reset(db->commit);
 	db->transaction_depth = 0;
-	return res;
+	return check(db, res);
 }
 
 EXPORT
-void N(full_commit)(T self) {
-	check(self, full_commit(self));
+result N(full_commit)(T self) {
+	return full_commit(self);
 }
 
-result check(T db, int res)
-{
+result check(T db, int res) {
 	switch(res) {
 	case SQLITE_OK:
 		return succeed;
