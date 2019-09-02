@@ -317,6 +317,7 @@ size_t N(total_changes)(T self) {
 }
 
 #define IMPLEMENTATION
+#undef DB_ALL_TYPES_SNIPPET_H 	/* HAX */
 #include "all_types.snippet.h"
 
 result N(bind_string)(N(stmt) stmt, int col, string value) {

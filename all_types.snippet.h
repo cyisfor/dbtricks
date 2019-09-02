@@ -9,8 +9,8 @@
 #define COLUMN_RETURN const void*
 #include "types.snippet.h"
 #define TYPE blob64
-#undef BIND_ARGS
-#define BIND_ARGS const void* blob, u64 len, void(*destructor)(void*)
+#define BIND_ARGS const void* val, int len, void(*destructor)(void*) 
+#define BIND_PARAMS val, len, destructor
 #include "types.snippet.h"
 #define TYPE text
 #undef BIND_ARGS
@@ -20,7 +20,9 @@
 #include "types.snippet.h"
 #define TYPE text64
 #undef BIND_ARGS
-#define BIND_ARGS const char* val, u64 len, void(*destructor)(void*)
+#define BIND_ARGS const char* val, u64 len, void(*destructor)(void*), unsigned char encoding
+#undef BIND_PARAMS
+#define BIND_PARAMS val, len, destructor, encoding
 #include "types.snippet.h"
 #undef BIND_ARGS
 #define BIND_ARGS TYPE val
