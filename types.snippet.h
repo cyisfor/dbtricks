@@ -36,6 +36,7 @@ COLUMN_RETURN COL_NAME(TYPE)(basedb_stmt, int col);
 #undef TYPE
 #undef BIND_NAME
 #undef BIND_ARGS
+#undef BIND_PARAMS
 #ifdef COLUMN_RETURN
 #undef COL_NAME
 #undef COLUMN_RETURN
