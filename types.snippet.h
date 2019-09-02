@@ -39,5 +39,5 @@ COLUMN_RETURN COL_NAME(TYPE)(basedb_stmt, int col);
 #ifdef COLUMN_RETURN
 #undef COL_NAME
 #undef COLUMN_RETURN
-#endif
+#endif /* COLUMN_RETURN */
 /* leave the rest for basedb_all_types.snippet.h to redefine */
