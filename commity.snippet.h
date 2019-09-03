@@ -1,23 +1,23 @@
 #include "concatsym.h" // strify
 
 #ifdef INCREMENT
-#define ADJUST ++
 #define VALUE_TRIGGER 0
 #define VALUE_FIRST 1
 #else
-#define ADJUST --
-#define VALUE_TRIGGER 1
+#define VALUE_TRIGGER 0
 #define VALUE_FIRST 0
 #endif
 
 static
 int FUNCNAME(T db) {
 	int res = SQLITE_ERROR;
-#ifndef INCREMENT
+#ifdef INCREMENT
+	++db->transaction_depth;
+#else
 	assert(db->transaction_depth > 0);
 #endif
 	if(db->transaction_depth == VALUE_TRIGGER) {
-		record(INFO, STRIFY(FUNCNAME) " TRIGGER %d ", VALUE_TRIGGER);
+//		record(DEBUG, STRIFY(FUNCNAME) " TRIGGER %d ", VALUE_TRIGGER);
 		res = sqlite3_step(db->FULL_COMMIT);
 		sqlite3_reset(db->FULL_COMMIT);
 		if(res == SQLITE_DONE)
@@ -35,12 +35,13 @@ int FUNCNAME(T db) {
 
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
 	if(stmt) {
-		record(INFO, STRIFY(FUNCNAME) " %d ", VALUE_TRIGGER);
+//		record(DEBUG, STRIFY(FUNCNAME) " %d ", VALUE_TRIGGER);
 		res = sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
-		if(res == SQLITE_DONE) {
-			ADJUST db->transaction_depth;
-		}	
+		check(db, res);
+#ifndef INCREMENT
+		--db->transaction_depth;
+#endif
 	} else {
 		record(ERROR, "Could not prepare " STRIFY(COMMIT_PREFIX) " %s",
 			   sqlite3_errstr(res));
@@ -57,7 +58,6 @@ result CONCATSYM(basedb_, FUNCNAME)(T self) {
 #undef FUNCNAME
 #undef FULL_COMMIT
 #undef COMMIT_PREFIX
-#undef ADJUST
 #undef VALUE_TRIGGER
 #undef VALUE_FIRST
 #undef INCREMENT
