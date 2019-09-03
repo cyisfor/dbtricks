@@ -101,7 +101,7 @@ result rollback(T db) {
 
 #define FUNCNAME base_release
 #define FULL_COMMIT commit
-#define COMMIT_PREFIX "RELEASE TO s"
+#define COMMIT_PREFIX "RELEASE s"
 #include "commity.snippet.h"
 
 EXPORT

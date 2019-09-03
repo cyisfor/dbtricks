@@ -17,6 +17,7 @@ int FUNCNAME(T db) {
 	assert(db->transaction_depth > 0);
 #endif
 	if(db->transaction_depth == VALUE_TRIGGER) {
+		record(INFO, STRIFY(FUNCNAME) " TRIGGER %d ", VALUE_TRIGGER);
 		res = sqlite3_step(db->FULL_COMMIT);
 		sqlite3_reset(db->FULL_COMMIT);
 		if(res == SQLITE_DONE)
@@ -34,6 +35,7 @@ int FUNCNAME(T db) {
 
 	sqlite3_stmt* stmt = prepare(db->sqlite, sql);
 	if(stmt) {
+		record(INFO, STRIFY(FUNCNAME) " %d ", VALUE_TRIGGER);
 		res = sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
 		if(res == SQLITE_DONE) {
