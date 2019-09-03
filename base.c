@@ -157,7 +157,7 @@ result check(T db, int res) {
 	record(ERROR, "sqlite error %d %s (%s)\n",
 		   res,
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
-	return fail;
+	return failure;
 }
 
 result N(once)(N(stmt) stmt) {
@@ -171,7 +171,7 @@ result N(retransaction)(T self) {
 	if(self->transaction_depth == 0) {
 		return success;
 	}
-	ensure_ne(fail, N(release)(self));
+	ensure_ne(failure, N(release)(self));
 	return N(savepoint)(self);
 }
 

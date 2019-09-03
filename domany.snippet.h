@@ -22,11 +22,11 @@ result OPERATION(T self, THING_HANDLER on_res, void* udata, string tail) {
 				return CHECK_RESULT(udata, check(self,res),				\
 									i,(&stmt),cur, tail);				\
 			}															\
-			return fail;												\
+			return failure;												\
 		}
 		CHECK;
 		if(stmt.sqlite == NULL)
-			return succeed; // just trailing comments, whitespace
+			return success; // just trailing comments, whitespace
 		if(next != NULL) {
 			cur.len = next - tail.base;
 			tail.len -= cur.len;
@@ -34,11 +34,11 @@ result OPERATION(T self, THING_HANDLER on_res, void* udata, string tail) {
 		}
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
-			if(fail == CHECK_RESULT(udata, check(self,res),i,(&stmt),cur,tail))
-				return fail;
+			if(failure == CHECK_RESULT(udata, check(self,res),i,(&stmt),cur,tail))
+				return failure;
 		}
 		if(next == NULL)
-			return succeed;
+			return success;
 		HANDLE_EXTRA(tail);
 	}
 }
