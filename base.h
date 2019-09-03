@@ -34,7 +34,7 @@ size_t N(stmt_changes)(N(stmt) db);
 N(stmt) N(prepare_str)(T db, string sql);
 void N(reset)(N(stmt) stmt);
 void N(finalize)(N(stmt) stmt);
-void N(once)(N(stmt) stmt);
+result N(once)(N(stmt) stmt);
 result N(step)(N(stmt) stmt);
 size_t N(stmt_changes)(N(stmt) stmt);
 

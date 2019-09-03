@@ -27,10 +27,10 @@ result OPERATION(db public, THING_HANDLER on_res, string tail) {
 				dbstmt.sqlite = stmt;									\
 				return CHECK_RESULT(res, i, &dbstmt, cur, tail);			\
 			}															\
-			return fail;												\
+			return failure;												\
 		}
 		CHECK;
-		if(stmt == NULL) return succeed; // just trailing comments, whitespace
+		if(stmt == NULL) return success; // just trailing comments, whitespace
 		if(next != NULL) {
 			cur.len = next - tail.base;
 			tail.len -= cur.len;
@@ -39,10 +39,10 @@ result OPERATION(db public, THING_HANDLER on_res, string tail) {
 		HANDLE_STATEMENT(stmt);
 		if(on_res) {
 			dbstmt.sqlite = stmt;
-			if(fail == CHECK_RESULT(res,i,&dbstmt,cur,tail)) return fail;
+			if(failure == CHECK_RESULT(res,i,&dbstmt,cur,tail)) return failure;
 		}
 		if(next == NULL)
-			return succeed;
+			return success;
 	}
 }
 
