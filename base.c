@@ -139,7 +139,7 @@ result check(T db, int res) {
 	case SQLITE_OK:
 		return success;
 	case SQLITE_ROW:
-		return success;		
+		return result_pending;		
 	case SQLITE_DONE:
 		return success;
 	};
