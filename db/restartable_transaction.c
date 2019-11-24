@@ -22,12 +22,16 @@ int FUNCTION_NAME(struct transdb* db, enum transaction_type type, ARGUMENTS) {
 			PREPARE(db, begin[type], "BEGIN EXCLUSIVE TRANSACTION");
 			break;
 		};
+		if(!db->commit)
+			PREPARE(db, commit, "COMMIT");
 	}
 	for(;;) {
 		basedb_once(db->begin[type]);
 		int res = WRAPPER_NAME(db, VALUES);
 		switch(res) {
 		case SQLITE_BUSY:
+			if(!db->rollback)
+				PREPARE(db->rollback);
 			basedb_once(db->rollback);
 			continue;
 		case SQLITE_OK:

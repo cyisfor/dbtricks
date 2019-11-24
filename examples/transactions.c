@@ -10,9 +10,22 @@ struct db {
 
 #define FUNCTION_NAME dothings
 int dothings_in_transaction(struct transdb* db, struct db* db) {
-	puts("derp");
+	basedb_bind_int(db->insert,1,23);
+	check_busy(basedb_step(db->insert));
+	basedb_reset(db->insert);
+	basedb_bind_int(db->insert,1,42);
+	check_busy(basedb_step(db->insert));
+	basedb_reset(db->insert);
+	puts("herp");
+	for(;;) {
+		if(result_done == check_busy(basedb_step(db->query))) {
+			break;
+		}
+		printf("derp %d\n", basedb_column_int(db->query, 0));
+	}
 	return SQLITE_OK;
 }
+
 #include "db/restartable_transaction.h"
 
 int main(int argc, char *argv[])
