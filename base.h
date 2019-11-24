@@ -30,6 +30,9 @@ T N(open_f)(struct N(open_params));
 void N(close)(T db);
 size_t N(stmt_changes)(N(stmt) db);
 
+void* N(data)(T db);
+void N(set_data)(T db, void* udata);
+
 #define basedb_prepare(db, ...) basedb_prepare_str(db, LITSTR(__VA_ARGS__));
 N(stmt) N(prepare_str)(T db, string sql);
 void N(reset)(N(stmt) stmt);
@@ -67,10 +70,6 @@ result N(release)(T db);
 result N(rollback)(T db);
 result N(full_commit)(T db);
 result N(retransaction)(T db);
-
-#include "defer.h"
-
-#define TRANSACTION(db) basedb_savepoint(db); DEFER { basedb_release(db); }
 
 bool N(has_table_str)(T db, string table_name);
 #define basedb_has_table(db, lit) basedb_has_table_str(db, LITSTR(lit))

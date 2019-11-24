@@ -25,6 +25,7 @@ struct T {
 	sqlite3_stmt *has_table;
 	int transaction_depth;
 	int error;
+	void* udata;
 };
 
 typedef struct N(stmt) {
@@ -207,6 +208,13 @@ void N(close)(T self) {
 		}
 	}
 	record(ERROR,"could not close the database");
+}
+
+void* N(data)(T db) {
+	return db->udata;
+}
+void N(set_data)(T db, void* udata) {
+	db->udata = udata;
 }
 
 result N(load)(T db, N(result_handler) on_res, void* udata, const char* path) {
