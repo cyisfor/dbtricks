@@ -17,15 +17,11 @@ int dothings_in_transaction(struct transdb* db, struct db* db) {
 	check_busy(basedb_step(db->insert));
 	basedb_reset(db->insert);
 	puts("herp");
-	for(;;) {
-		if(result_done == check_busy(basedb_step(db->query))) {
-			break;
-		}
+	while(result_pending == check_busy(basedb_step(db->query))) {
 		printf("derp %d\n", basedb_column_int(db->query, 0));
 	}
 	return SQLITE_OK;
 }
-
 #include "db/restartable_transaction.h"
 
 int main(int argc, char *argv[])
@@ -40,7 +36,10 @@ int main(int argc, char *argv[])
 				")");
 	db.insert = basedb_prepare(db.base, "INSERT INTO stuff (value) VALUES (?)");
 	db.query = basedb_prepare(db.base, "SELECT value FROM stuff ORDER BY value");
-	dothings(&db.trans, DEFERRED_TRANSACTION, &db);
+	int i = 0;
+	for(i=0;i<1000;++i) {
+		dothings(&db.trans, DEFERRED_TRANSACTION, &db);
+	}
 	transaction_finalize(&db.trans);
 	basedb_finalize(db.insert);
 	basedb_finalize(db.query);

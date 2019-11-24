@@ -22,4 +22,6 @@ struct transdb {
 extern int transaction(struct transdb*, enum transaction_type, ARGUMENTS);
 #include "db_restartable_transaction.h"
 
+#define check_busy(expr) ({ result res = (expr); if(res
+
 #endif /* DB_TRANSACTIONS_H */
