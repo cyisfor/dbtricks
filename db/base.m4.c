@@ -16,9 +16,11 @@
 #include <error.h>
 #include <unistd.h> // sleep
 
-#define N(a) CONCATSYM(basedb_, a)
-#define T basedb
-
+m4_divert(`-1');
+m4_include(`c.m4')
+m4_define({{N}}, {{basedb_$1}})
+m4_define({{T}}, {{basedb}})
+m4_divert{{}}m4_dnl ;
 struct T {
 	sqlite3* sqlite;
 	sqlite3_stmt *begin, *commit, *rollback;
