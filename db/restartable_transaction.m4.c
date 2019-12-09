@@ -1,8 +1,7 @@
 m4_divert({{-1}});
-m4_define(WRAPPER_NAME, FUNCTION_NAME _in_transaction);
+m4_define(WRAPPER_NAME, FUNCTION_NAME{{}}_in_transaction);
 m4_define(PREPARE, {{$1}}->{{$2}} = basedb_prepare({{$1}}->conn, LITLEN({{$3}})));
-m4_divert dnl ;
-
+m4_divert{{}}m4_dnl ;
 WRAPPER_NAME;
 PREPARE(self, {{begin[type]}}, "BEGIN IMMEDIATE TRANSACTION");
 
@@ -15,7 +14,7 @@ PREPARE(self, {{begin[type]}}, "BEGIN IMMEDIATE TRANSACTION");
 						  LITLEN(sql),									\
 						  &self->member, NULL));
 
-int FUNCTION_NAME(struct transdb* db, enum transaction_type type, ARGUMENTS) {
+int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type, ARGUMENTS) {
 	if(!db->begin[type]) {
 		switch(type) {
 		case DEFERRED_TRANSACTION:
