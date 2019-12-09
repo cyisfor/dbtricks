@@ -20,8 +20,17 @@ m4(db/all_types.m4.h db/all_types.c 1)
 m4(db/all_types.m4.h db/all_types.h "")
 
 add_subdirectory(cstuff)
-add_cstuff(myint)
+add_cstuff(itoa record mmapfile)
+
+include(FindPkgConfig)
+pkg_check_modules(SQLITE
+  REQUIRED IMPORTED_TARGET
+  sqlite3)
 
 add_library(basedb db/base.c)
-target_include_directories(basedb PUBLIC cstuff "${CMAKE_CURRENT_BINARY_DIR}")
-target_include_directories(basedb PRIVATE cstuff "${CMAKE_CURRENT_BINARY_DIR}/db")
+target_include_directories(basedb PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(basedb PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/db")
+target_link_libraries(basedb cstuff PkgConfig::SQLITE)
+
+add_executable(example example/main.c)
+target_link_libraries(example PRIVATE basedb)
