@@ -7,7 +7,7 @@ result N(bind_{{}}TYPE{{}})(N(stmt) stmt, int col, BIND_ARGS) {
 m4_ifdef({{COLUMN_RETURN}}, {{m4_dnl;
 EXPORT
 COLUMN_RETURN N(column_{{}}TYPE)(N(stmt) stmt, int col) {
-	return sqlite3_column_{{}}TYPE(stmt->sqlite, col);
+	return sqlite3_column_{{}}TYPE{{}}(stmt->sqlite, col);
 }
 }})
 }},{{
