@@ -1,12 +1,18 @@
-#ifndef DB_ALL_TYPES_H
-#define DB_ALL_TYPES_H
-#include "myint.h"
 m4_divert(`-1');
 m4_include(`c.m4')
 m4_define({{N}}, {{basedb_$1}})
 m4_define({{T}}, {{basedb}})
 m4_divert{{}}m4_dnl ;
 m4_dnl;
+m4_ifdef({{IMPLEMENTATION}},{{m4_dnl;
+#include "all_types.h"
+}},{{m4_dnl;
+#ifndef DB_ALL_TYPES_H
+#define DB_ALL_TYPES_H
+#include "myint.h"
+#include "result.h"			
+}})m4_dnl;
+
 m4_divert({{-1}});
 m4_define({{TYPE}}, blob);
 m4_define({{BIND_ARGS}}, {{const void* val, int len, void(*destructor)(void*)}});
@@ -67,4 +73,7 @@ m4_define({{BIND_ARGS}}, {{u64 val}});
 m4_divert{{}}m4_dnl ;
 m4_include({{types.m4.h}})m4_dnl;
 
+m4_ifdef({{IMPLEMENTATION}},{{}},{{m4_dnl;
 #endif /* DB_ALL_TYPES_SNIPPET_H */
+}})m4_dnl;
+
