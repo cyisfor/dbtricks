@@ -12,9 +12,8 @@ COLUMN_RETURN basedb_column_{{}}TYPE(N(stmt) stmt, int col) {
 }})
 }},{{
 m4_dnl; /* else not IMPLEMENTATION */
-/* interface... */
-result sqlite3_bind_{{}}TYPE(N(stmt), int col, BIND_ARGS);
-m4_ifdef(COLUMN_RETURN, {{
-COLUMN_RETURN basedb_column_{{}}TYPE(N(stmt), int col);
-}})m4_dnl 						/* COLUMN_RETURN */
-	}})m4_dnl					/* not IMPLEMENTATION */
+result sqlite3_bind_{{}}TYPE{{}}(N(stmt), int col, BIND_ARGS);
+m4_ifdef({{COLUMN_RETURN}}, {{m4_dnl
+COLUMN_RETURN basedb_column_{{}}TYPE{{}}(N(stmt), int col);
+}})m4_dnl; 						/* COLUMN_RETURN */
+}})m4_dnl;					/* not IMPLEMENTATION */
