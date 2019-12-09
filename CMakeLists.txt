@@ -6,7 +6,6 @@ function(m4 source dest implementation)
 	set(implementation "-DIMPLEMENTATION")
   endif(implementation)
   get_filename_component(thedir "${source}" DIRECTORY)
-  message(INFO foo (${thedir})(${source}))
   add_custom_command(
 	OUTPUT "${dest}"
 	COMMAND
@@ -20,4 +19,9 @@ endfunction(m4)
 m4(db/all_types.m4.h db/all_types.c 1)
 m4(db/all_types.m4.h db/all_types.h "")
 
-add_executable(derp db/all_types.c)
+add_subdirectory(cstuff)
+add_cstuff(myint)
+
+add_library(basedb db/base.c)
+target_include_directories(basedb PUBLIC cstuff "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(basedb PRIVATE cstuff "${CMAKE_CURRENT_BINARY_DIR}/db")
