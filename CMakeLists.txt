@@ -42,7 +42,8 @@ m4(db/all_types.m4.h IMPLEMENTATION)
 m4(db/all_types.m4.h)
 
 function(restartable_transaction target function)
-  foreach(thing "${ARGN}")
+  foreach(thing ${ARGN})
+	message(WARNING "thing (${thing})")
 	if(type)
 	  list(APPEND arguments "${type} ${thing}")
 	  list(APPEND values "${thing}")
@@ -54,6 +55,7 @@ function(restartable_transaction target function)
   list(JOIN arguments ", " arguments)
   list(JOIN values ", " values)
   if(arguments)
+	set(derparguments "${arguments}")
 	set(arguments ", ${arguments}")
 	set(values ", ${values}")
   endif()
@@ -61,6 +63,7 @@ function(restartable_transaction target function)
 	DEST "${target}.c"
 	OPTIONS
 	"-DFUNCTION_NAME=${function}"
+	"-DDERPARGUMENTS=${derparguments}"
 	"-DARGUMENTS=${arguments}"
 	"-DVALUES=${values}")
   add_custom_target("${target}"
@@ -87,7 +90,7 @@ target_link_libraries(basedb cstuff PkgConfig::SQLITE)
 add_executable(example example/main.c)
 target_link_libraries(example PRIVATE basedb)
 
-restartable_transaction(foo bar "int val" "char val2")
+restartable_transaction(foo bar int val char val2)
 add_executable(restartable_example
   "${CMAKE_CURRENT_BINARY_DIR}/foo.c"
   example/restartable.c)

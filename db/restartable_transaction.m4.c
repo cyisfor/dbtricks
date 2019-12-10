@@ -6,7 +6,9 @@ m4_ifdef({{WRAPPER_NAME}},{{}},{{
 m4_define({{PREPARE}}, {{$1}}->{{$2}} = basedb_prepare({{$1}}->conn, LITLEN({{$3}})));
 m4_divert{{}}m4_dnl ;
 m4_dnl;
-int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type, ARGUMENTS) {
+int WRAPPER_NAME{{}}(DERPARGUMENTS);
+
+int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENTS) {
 	if(!db->begin[type]) {
 		switch(type) {
 		case DEFERRED_TRANSACTION:
@@ -24,11 +26,11 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type, ARGUMENTS)
 	}
 	for(;;) {
 		basedb_once(db->begin[type]);
-		int res = WRAPPER_NAME{{}}(db, VALUES);
+		int res = WRAPPER_NAME{{}}(db{{}}VALUES);
 		switch(res) {
 		case SQLITE_BUSY:
 			if(!db->rollback)
-				PREPARE(db->rollback);
+				PREPARE(db, rollback, "ROLLBACK");
 			basedb_once(db->rollback);
 			continue;
 		case SQLITE_OK:
