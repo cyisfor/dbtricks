@@ -13,12 +13,11 @@ function(m4 source)
   get_filename_component(thedir "${source}" DIRECTORY)
   if(A_DEST)
   else()
-	if(!A_EXT)
+	if(A_EXT)
+	else()
 	  if(A_IMPLEMENTATION)
-		message(WARNING ext "(${A_EXT})")
 		set(A_EXT "c")
 	  else(A_IMPLEMENTATION)
-		message(WARNING ext "(${A_EXT})")
 		set(A_EXT "h")
 	  endif(A_IMPLEMENTATION)
 	endif()
@@ -27,7 +26,7 @@ function(m4 source)
 	set(A_DEST "${thedir}/${A_DEST}.${A_EXT}")
   endif()
   add_custom_command(
-	OUTPUT "${dest}"
+	OUTPUT "${A_DEST}"
 	COMMAND
 	m4 -I"${CMAKE_CURRENT_SOURCE_DIR}/m4"
 	-I"${CMAKE_CURRENT_SOURCE_DIR}/${thedir}"
@@ -72,3 +71,8 @@ target_link_libraries(basedb cstuff PkgConfig::SQLITE)
 
 add_executable(example example/main.c)
 target_link_libraries(example PRIVATE basedb)
+
+restartable_transaction(foo bar "int val" "char val2")
+add_executable(restartable_example
+  "${CMAKE_CURRENT_BINARY_DIR}/foo.c"
+  example/restartable.c)
