@@ -92,7 +92,7 @@ target_link_libraries(basedb cstuff PkgConfig::SQLITE)
 add_executable(example example/main.c)
 target_link_libraries(example PRIVATE basedb)
 
-restartable_transaction(foo bar int val char val2)
+restartable_transaction(foo bar basedb_stmt insert int val char val2)
 add_custom_target(inner_include_crap2
   DEPENDS foo.c)
 add_executable(restartable_example
