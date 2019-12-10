@@ -22,6 +22,7 @@ function(m4 source)
 	get_filename_component(A_DEST "${source}" NAME_WE)
 	set(A_DEST "${thedir}/${A_DEST}.${A_EXT}")
   endif()
+  message(WARNING DEST "${A_DEST}")
   add_custom_command(
 	OUTPUT "${dest}"
 	COMMAND
@@ -36,10 +37,18 @@ function(m4 source)
 endfunction(m4)
 
 m4(db/all_types.m4.h IMPLEMENTATION)
-m4(db/all_types.m4.h db/all_types.h "")
+m4(db/all_types.m4.h)
 
-function(restartable_module target function argument)
-  
+function(restartable_transaction target function argument)
+  list(JOIN ARGN ", " ${ARGN})
+  m4(db/restartable_transaction.m4.c
+	DEST "${target}.c"
+	OPTIONS
+	"-DFUNCTION_NAME=${function}"
+	"-DARGUMENTS=${argument}, ${ARGN}")
+  add_custom_target("${target}"
+	DEPENDS "${target}.c")
+endfunction()
 
 add_custom_target(all_types
   DEPENDS db/all_types.c db/all_types.h)
