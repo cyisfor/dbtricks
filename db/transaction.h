@@ -17,7 +17,8 @@ struct transdb {
 	basedb_stmt commit;
 };
 
-typedef transdb_handler int (*handler)(struct transdb*, void*);
-extern int transaction(struct transdb*, enum transaction_type,  transdb_handler, void*);
+typedef int (*transdb_handler)(basedb, void*);
+extern int transaction(struct transdb*, enum transaction_type,
+					   transdb_handler, void*);
 
 #endif /* DB_TRANSACTIONS_H */
