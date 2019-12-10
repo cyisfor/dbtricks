@@ -20,6 +20,7 @@ m4_dnl;
 m4_divert({{-1}});
 m4_define({{TYPE}}, blob64)
 m4_define({{BIND_ARGS}}, {{const void* val, u64 len, void(*destructor)(void*)}})
+m4_undefine({{COLUMN_RETURN}});
 m4_divert{{}}m4_dnl ;
 m4_include({{types.m4.h}})m4_dnl;
 m4_dnl;
@@ -34,6 +35,7 @@ m4_divert({{-1}});
 m4_define({{TYPE}}, text64);
 m4_define({{BIND_ARGS}}, {{const char* val, u64 len, void(*destructor)(void*), unsigned char encoding}});
 m4_define({{BIND_PARAMS}}, {{val, len, destructor, encoding}});
+m4_undefine({{COLUMN_RETURN}});
 m4_divert{{}}m4_dnl ;
 m4_include({{types.m4.h}})m4_dnl;
 m4_dnl;
