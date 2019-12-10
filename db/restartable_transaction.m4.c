@@ -8,6 +8,7 @@ m4_divert{{}}m4_dnl ;
 m4_dnl;
 int WRAPPER_NAME{{}}(basedb db{{}}ARGUMENTS);
 
+#include "db/transaction.struct.h"
 #include <sqlite3.h>
 
 int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENTS) {

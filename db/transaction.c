@@ -1,7 +1,9 @@
 #include "transaction.h"
 #include "transaction.struct.h"
 #include <sqlite3.h> // SQLITE_*
-#include <glib.h>
+/* #include <glib.h> */
+#define g_slice_new0(type) malloc(sizeof(type))
+#define g_slice_free(type, var) free(var)
 
 transdb transdb_open(basedb conn) {
 	transdb db = g_slice_new0(struct transdb);
@@ -9,7 +11,7 @@ transdb transdb_open(basedb conn) {
 	return db;
 }
 void transdb_close(transdb db) {
-#define CLEANUP(member) \	
+#define CLEANUP(member) \
 	if(db->member) { \
 		basedb_finalize(db->member); \
 		db->member = NULL; \

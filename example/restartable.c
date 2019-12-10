@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
 	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");
 	transdb trans = transdb_open(db);
-	bar(&trans, DEFERRED_TRANSACTION,
+	bar(trans, DEFERRED_TRANSACTION,
 		insert, 23, 42);
 	basedb_bind_int(insert, 1, 42);
 	basedb_once(insert);
