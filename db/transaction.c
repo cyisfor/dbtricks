@@ -1,6 +1,33 @@
 #include "transaction.h"
 #include <sqlite3.h> // SQLITE_*
 
+struct transdb {
+	basedb conn;
+	basedb_stmt begin[TRANSACTION_TYPES];
+	basedb_stmt rollback;
+	basedb_stmt commit;
+};
+
+transdb transdb_open(basedb conn) {
+	transdb db = g_slice_new0(struct transdb);
+	db->conn = conn;
+	return db;
+}
+void transdb_close(transdb db) {
+#define CLEANUP(member) \	
+	if(db->member) { \
+		basedb_finalize(db->member); \
+		db->member = NULL; \
+	}
+	CLEANUP(begin[DEFERRED_TRANSACTION]);
+	CLEANUP(begin[IMMEDIATE_TRANSACTION]);
+	CLEANUP(begin[EXCLUSIVE_TRANSACTION]);
+	CLEANUP(rollback);
+	CLEANUP(commit);
+	g_slice_free(struct transdb, db);
+}
+
+
 static
 int transaction_in_transaction(basedb db, transdb_handler handler, void* udata) {
 	return handler(db, udata);
