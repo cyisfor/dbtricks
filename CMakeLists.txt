@@ -41,13 +41,28 @@ endfunction(m4)
 m4(db/all_types.m4.h IMPLEMENTATION)
 m4(db/all_types.m4.h)
 
-function(restartable_transaction target function argument)
-  list(JOIN ARGN ", " ${ARGN})
+function(restartable_transaction target function)
+  foreach(thing "${ARGN}")
+	if(type)
+	  list(APPEND arguments "${type} ${thing}")
+	  list(APPEND values "${thing}")
+	  unset(type)
+	else(type)
+	  set(type "${thing}")
+	endif(type)
+  endforeach()
+  list(JOIN arguments ", " arguments)
+  list(JOIN values ", " values)
+  if(arguments)
+	set(arguments ", ${arguments}")
+	set(values ", ${values}")
+  endif()
   m4(db/restartable_transaction.m4.c
 	DEST "${target}.c"
 	OPTIONS
 	"-DFUNCTION_NAME=${function}"
-	"-DARGUMENTS=${argument}, ${ARGN}")
+	"-DARGUMENTS=${arguments}"
+	"-DVALUES=${values}")
   add_custom_target("${target}"
 	DEPENDS "${target}.c")
 endfunction()
