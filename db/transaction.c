@@ -1,10 +1,8 @@
-#define DB_RESTARTABLE_TRANSACTION_IMPL
-#include "db_transactions.h"
-#define VALUES handler, udata
+#include "transaction.h"
 static
-int in_transaction(struct transdb* db, ARGUMENTS) {
-	return handler(db, udata);
+int transaction_in_transaction(struct transdb* db, transdb_handler handler, void* udata) {
+	return handler(db->conn, udata);
 }
 #define WRAPPER_NAME in_transaction
 
-#include "db_restartable_transaction.c"
+#include "runtime_transaction.c"

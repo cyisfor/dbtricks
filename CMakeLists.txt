@@ -43,7 +43,6 @@ m4(db/all_types.m4.h)
 
 function(restartable_transaction target function)
   foreach(thing ${ARGN})
-	message(WARNING "thing (${thing})")
 	if(type)
 	  list(APPEND arguments "${type} ${thing}")
 	  list(APPEND values "${thing}")
@@ -81,7 +80,9 @@ pkg_check_modules(SQLITE
   REQUIRED IMPORTED_TARGET
   sqlite3)
 
-add_library(basedb db/base.c)
+restartable_transaction(runtime_transaction transaction transdb_handler handler void* udata)
+
+add_library(basedb db/base.c db/transaction.c)
 add_dependencies(basedb all_types)
 target_include_directories(basedb PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(basedb PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/db")

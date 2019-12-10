@@ -17,11 +17,7 @@ struct transdb {
 	basedb_stmt commit;
 };
 
-#define FUNCTION_NAME transaction
-#define ARGUMENTS int (*handler)(struct transdb*, void*), void* udata)
-extern int transaction(struct transdb*, enum transaction_type, ARGUMENTS);
-#include "db_restartable_transaction.h"
-
-#define check_busy(expr) ({ result res = (expr); if(res
+typedef transdb_handler int (*handler)(struct transdb*, void*);
+extern int transaction(struct transdb*, enum transaction_type,  transdb_handler, void*);
 
 #endif /* DB_TRANSACTIONS_H */

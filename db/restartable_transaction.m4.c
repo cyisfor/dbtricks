@@ -26,7 +26,7 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 	}
 	for(;;) {
 		basedb_once(db->begin[type]);
-		int res = WRAPPER_NAME{{}}(db{{}}VALUES);
+		int res = WRAPPER_NAME{{}}(db->conn{{}}VALUES);
 		switch(res) {
 		case SQLITE_BUSY:
 			if(!db->rollback)
