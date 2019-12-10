@@ -2,6 +2,7 @@
 #include "db/transaction.h"
 
 #include <unistd.h> // sleep
+#include <stdio.h> // 
 
 
 static
@@ -14,6 +15,7 @@ int bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
 		/* XXX: check busy after every return? */
 		basedb_once(insert);
 		sleep(1);
+		printf("inserted %d\n", i);
 	}
 }
 

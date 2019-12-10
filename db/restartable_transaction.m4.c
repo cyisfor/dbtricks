@@ -31,8 +31,9 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 		int res = WRAPPER_NAME{{}}(db->conn{{}}VALUES);
 		switch(res) {
 		case SQLITE_BUSY:
-			if(!db->rollback)
+			if(!db->rollback) {
 				PREPARE(db, rollback, "ROLLBACK");
+			}
 			basedb_once(db->rollback);
 			continue;
 		case SQLITE_OK:
@@ -41,6 +42,9 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 			basedb_once(db->commit);
 			return res;
 		default:
+			if(!db->rollback) {
+				PREPARE(db, rollback, "ROLLBACK");
+			}
 			basedb_once(db->rollback);
 			return res;
 		};

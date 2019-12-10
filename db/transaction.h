@@ -10,15 +10,13 @@ enum transaction_type {
 	TRANSACTION_TYPES
 };
 
-struct transdb {
-	basedb conn;
-	basedb_stmt begin[TRANSACTION_TYPES];
-	basedb_stmt rollback;
-	basedb_stmt commit;
-};
+struct transdb* transdb;
 
 typedef int (*transdb_handler)(basedb, void*);
-extern int transaction(struct transdb*, enum transaction_type,
+extern int transaction(transdb, enum transaction_type,
 					   transdb_handler, void*);
+
+transdb transdb_open(basedb);
+void transdb_close(transdb);
 
 #endif /* DB_TRANSACTIONS_H */
