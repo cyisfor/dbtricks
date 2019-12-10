@@ -85,8 +85,8 @@ add_custom_target(inner_include_crap
   DEPENDS runtime_transaction.c)
 add_library(basedb db/base.c db/transaction.c)
 add_dependencies(basedb all_types inner_include_crap)
-target_include_directories(basedb PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
-target_include_directories(basedb PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/db")
+target_include_directories(basedb PUBLIC
+  "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/db")
 target_link_libraries(basedb cstuff PkgConfig::SQLITE)
 
 add_executable(example example/main.c)

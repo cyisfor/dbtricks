@@ -1,8 +1,11 @@
 #include "db/base.h"
 #include "db/transaction.h"
 
+#include <unistd.h> // sleep
+
+
 static
-int foo_in_transaction(basedb db, basedb_stmt insert, int val, int val2) {
+int bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
 	basedb_bind_int(insert, 1, val);
 	basedb_bind_int(insert, 2, val2);
 	int i;
@@ -22,9 +25,10 @@ int main(int argc, char *argv[])
 	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
 	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");
 	struct transdb trans = {
-		.db = db
+		.conn = db
 	};
-	foo(&trans, insert, 23, 42);
+	bar(&trans, DEFERRED_TRANSACTION,
+		insert, 23, 42);
 	basedb_bind_int(insert, 1, 42);
 	basedb_once(insert);
 
