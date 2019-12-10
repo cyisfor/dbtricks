@@ -3,10 +3,10 @@ m4_include(`c.m4');
 m4_ifdef({{WRAPPER_NAME}},{{}},{{
 		m4_define(WRAPPER_NAME, FUNCTION_NAME{{}}_in_transaction);
 		}});
-m4_define({{PREPARE}}, {{$1}}->{{$2}} = basedb_prepare({{$1}}->conn, LITLEN({{$3}})));
+m4_define({{PREPARE}}, {{$1}}->{{$2}} = basedb_prepare_str({{$1}}->conn, LITSTR({{$3}})));
 m4_divert{{}}m4_dnl ;
 m4_dnl;
-int WRAPPER_NAME{{}}(DERPARGUMENTS);
+int WRAPPER_NAME{{}}(basedb db{{}}ARGUMENTS);
 
 int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENTS) {
 	if(!db->begin[type]) {
@@ -40,7 +40,7 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 			return res;
 		default:
 			basedb_once(db->rollback);
-			CHECK(res);
+			return res;
 		};
 	}
 }

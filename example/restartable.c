@@ -1,5 +1,14 @@
 #include "db/base.h"
 
+static
+int foo_in_transaction(basedb db, basedb_stmt insert, int val, int val2) {
+	basedb_bind_int(insert, 1, val);
+	basedb_bind_int(insert, 2, val2);
+	/* XXX: check busy after every return? */
+	basedb_once(insert);
+}
+#include "foo.c"
+
 int main(int argc, char *argv[])
 {
     basedb db = basedb_open("/tmp/deletethis.sqlite", false);
