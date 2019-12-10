@@ -1,12 +1,7 @@
 #include "transaction.h"
+#include "transaction.struct.h"
 #include <sqlite3.h> // SQLITE_*
-
-struct transdb {
-	basedb conn;
-	basedb_stmt begin[TRANSACTION_TYPES];
-	basedb_stmt rollback;
-	basedb_stmt commit;
-};
+#include <glib.h>
 
 transdb transdb_open(basedb conn) {
 	transdb db = g_slice_new0(struct transdb);

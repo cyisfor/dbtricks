@@ -1,4 +1,5 @@
 #include "symjoin.h"
+#include "transaction.struct.h"
 
 #ifndef WRAPPER_NAME
 #define WRAPPER_NAME symjoin(FUNCTION_NAME, _in_transaction)

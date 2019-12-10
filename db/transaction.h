@@ -10,7 +10,7 @@ enum transaction_type {
 	TRANSACTION_TYPES
 };
 
-struct transdb* transdb;
+typedef struct transdb* transdb;
 
 typedef int (*transdb_handler)(basedb, void*);
 extern int transaction(transdb, enum transaction_type,
