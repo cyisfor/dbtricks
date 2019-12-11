@@ -6,12 +6,13 @@ m4_ifdef({{WRAPPER_NAME}},{{}},{{
 m4_define({{PREPARE}}, {{$1}}->{{$2}} = basedb_prepare_str({{$1}}->conn, LITSTR({{$3}})));
 m4_divert{{}}m4_dnl ;
 m4_dnl;
-int WRAPPER_NAME{{}}(basedb db{{}}ARGUMENTS);
-
 #include "db/transaction.struct.h"
 #include "result.h"
 
-int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENTS) {
+result WRAPPER_NAME{{}}(basedb db{{}}ARGUMENTS);
+
+result FUNCTION_NAME{{}}(struct transdb* db,
+						 enum transaction_type type{{}}ARGUMENTS) {
 	if(!db->begin[type]) {
 		switch(type) {
 		case DEFERRED_TRANSACTION:
@@ -29,7 +30,7 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 	}
 	for(;;) {
 		basedb_once(db->begin[type]);
-		int res = WRAPPER_NAME{{}}(db->conn{{}}VALUES);
+		result res = WRAPPER_NAME{{}}(db->conn{{}}VALUES);
 		switch(res) {
 		case result_busy:
 			if(!db->rollback) {
@@ -38,15 +39,14 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 			basedb_once(db->rollback);
 			continue;
 		case result_success:
-		case result_partial:
+		case result_pending:
 			basedb_once(db->commit);
-			return res;
 		default:
 			if(!db->rollback) {
 				PREPARE(db, rollback, "ROLLBACK");
 			}
 			basedb_once(db->rollback);
-			return res;
 		};
+		return res;
 	}
 }

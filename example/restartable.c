@@ -6,9 +6,10 @@
 
 
 static
-int bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
-	void cleanup(void) {
+result bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
+	result cleanup(void) {
 		puts("cleanup for retrying");
+		return result_busy;
 	}
 
 	basedb_bind_int(insert, 1, val);
@@ -17,7 +18,7 @@ int bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
 	for(i=0;i<10;++i) {
 		basedb_bind_int(insert, 3, i);
 		/* XXX: check busy after every return? */
-		basedb_once(insert);
+		transdb_check(basedb_once(insert));
 		sleep(1);
 		printf("inserted %d\n", i);
 	}
@@ -33,8 +34,6 @@ int main(int argc, char *argv[])
 	transdb trans = transdb_open(db);
 	bar(trans, DEFERRED_TRANSACTION,
 		insert, 23, 42);
-	basedb_bind_int(insert, 1, 42);
-	transdb_check(basedb_once(insert));
 
 	transdb_close(trans);
 	basedb_finalize(insert);

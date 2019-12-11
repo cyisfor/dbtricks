@@ -20,8 +20,9 @@ extern result transaction(transdb, enum transaction_type,
 transdb transdb_open(basedb);
 void transdb_close(transdb);
 
-#define transdb_check(a) if(a == result_busy) {
-	return cleanup();  \
-}
+#define transdb_check(a)						\
+	if(a == result_busy) {						\
+		return cleanup();						\
+	}
 
 #endif /* DB_TRANSACTIONS_H */
