@@ -7,6 +7,10 @@
 
 static
 int bar_in_transaction(basedb db, basedb_stmt insert, int val, char val2) {
+	void cleanup(void) {
+		puts("cleanup for retrying");
+	}
+
 	basedb_bind_int(insert, 1, val);
 	basedb_bind_int(insert, 2, val2);
 	int i;
@@ -30,7 +34,7 @@ int main(int argc, char *argv[])
 	bar(trans, DEFERRED_TRANSACTION,
 		insert, 23, 42);
 	basedb_bind_int(insert, 1, 42);
-	basedb_once(insert);
+	transdb_check(basedb_once(insert));
 
 	transdb_close(trans);
 	basedb_finalize(insert);

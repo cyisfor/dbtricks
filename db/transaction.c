@@ -1,8 +1,8 @@
 #include "transaction.h"
 #include "transaction.struct.h"
-#include <sqlite3.h> // SQLITE_*
+
 /* #include <glib.h> */
-#define g_slice_new0(type) malloc(sizeof(type))
+#define g_slice_new0(type) calloc(1,sizeof(type))
 #define g_slice_free(type, var) free(var)
 
 transdb transdb_open(basedb conn) {
@@ -26,7 +26,7 @@ void transdb_close(transdb db) {
 
 
 static
-int transaction_in_transaction(basedb db, transdb_handler handler, void* udata) {
+result transaction_in_transaction(basedb db, transdb_handler handler, void* udata) {
 	return handler(db, udata);
 }
 #define WRAPPER_NAME in_transaction

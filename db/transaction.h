@@ -2,6 +2,7 @@
 #define DB_TRANSACTIONS_H
 
 #include "db/base.h"
+#include "result.h"
 
 enum transaction_type {
 	DEFERRED_TRANSACTION = 0,
@@ -12,11 +13,15 @@ enum transaction_type {
 
 typedef struct transdb* transdb;
 
-typedef int (*transdb_handler)(basedb, void*);
-extern int transaction(transdb, enum transaction_type,
-					   transdb_handler, void*);
+typedef result (*transdb_handler)(basedb, void*);
+extern result transaction(transdb, enum transaction_type,
+						transdb_handler, void*);
 
 transdb transdb_open(basedb);
 void transdb_close(transdb);
+
+#define transdb_check(a) if(a == result_busy) {
+	return cleanup();  \
+}
 
 #endif /* DB_TRANSACTIONS_H */

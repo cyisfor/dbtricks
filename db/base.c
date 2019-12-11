@@ -138,11 +138,14 @@ result N(full_commit)(T self) {
 result check(T db, int res) {
 	switch(res) {
 	case SQLITE_OK:
-		return success;
+		return result_success;
+	case SQLITE_BUSY:
+		db->error = res;
+		return result_busy;
 	case SQLITE_ROW:
 		return result_pending;		
 	case SQLITE_DONE:
-		return success;
+		return result_success;
 	};
 #if 0
 	if(db->transaction_depth > 0) {
@@ -158,7 +161,7 @@ result check(T db, int res) {
 	record(ERROR, "sqlite error %d %s (%s)\n",
 		   res,
 			sqlite3_errstr(res), sqlite3_errmsg(db->sqlite));
-	return failure;
+	return result_failure;
 }
 
 result N(once)(N(stmt) stmt) {
@@ -170,9 +173,9 @@ result N(once)(N(stmt) stmt) {
 
 result N(retransaction)(T self) {
 	if(self->transaction_depth == 0) {
-		return success;
+		return result_success;
 	}
-	ensure_ne(failure, N(release)(self));
+	ensure_ne(result_failure, N(release)(self));
 	return N(savepoint)(self);
 }
 
@@ -251,7 +254,7 @@ result N(exec_str)(T db, string sql) {
 		const byte* newline = memchr(tail.base, '\n', tail.len);	\
 		if(!newline) {												\
 			/* no more */											\
-			return success;											\
+			return result_success;											\
 		}															\
 		name.base = tail.base;										\
 		name.len = (newline - tail.base);							\
@@ -324,9 +327,14 @@ size_t N(stmt_changes)(N(stmt) stmt) {
 
 int N(change)(N(stmt) stmt) {
 /* insert, update or delete */
-	ensure_eq(success, N(step)(stmt));
+	result res = N(step)(stmt);
 	int ret = N(stmt_changes)(stmt);
 	sqlite3_reset(stmt->sqlite);
+	if(res == result_busy) {
+		return -1;
+	}
+	ensure_eq(result_success, res);
+	return ret;
 }
 
 size_t N(total_changes)(T self) {

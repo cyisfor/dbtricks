@@ -9,7 +9,7 @@ m4_dnl;
 int WRAPPER_NAME{{}}(basedb db{{}}ARGUMENTS);
 
 #include "db/transaction.struct.h"
-#include <sqlite3.h>
+#include "result.h"
 
 int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENTS) {
 	if(!db->begin[type]) {
@@ -31,15 +31,14 @@ int FUNCTION_NAME{{}}(struct transdb* db, enum transaction_type type{{}}ARGUMENT
 		basedb_once(db->begin[type]);
 		int res = WRAPPER_NAME{{}}(db->conn{{}}VALUES);
 		switch(res) {
-		case SQLITE_BUSY:
+		case result_busy:
 			if(!db->rollback) {
 				PREPARE(db, rollback, "ROLLBACK");
 			}
 			basedb_once(db->rollback);
 			continue;
-		case SQLITE_OK:
-		case SQLITE_DONE:
-		case SQLITE_ROW:
+		case result_success:
+		case result_partial:
 			basedb_once(db->commit);
 			return res;
 		default:
