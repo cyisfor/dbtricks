@@ -28,6 +28,17 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char va
 
 #include "foo.c"
 
+void do_one(basedb_stmt insert, transdb trans) {
+	int i;
+	for(i=0;i<10;++i) {
+		printf("%d trying %d %d\n", getpid(), ++counter, i);
+		bar(trans, DEFERRED_TRANSACTION,
+			insert, i, 23, 42);
+		printf("%d done %d %d\n", getpid(), counter, i);
+		sleep(1);
+	}
+}
+
 int main(int argc, char *argv[])
 {
     basedb db = basedb_open("/tmp/deletethis.sqlite", false);
@@ -36,28 +47,20 @@ int main(int argc, char *argv[])
 	transdb trans = transdb_open(db);
 	int num = atoi(getenv("num"));
 	if(!num) num = 10;
-	int i;
+	int i = 0;
 	int pids[num];
-	for(i=0;i<num;++i) {
-		int pid = fork();
-		if(pid == 0) {
-			for(i=0;i<10;++i) {
-				printf("%d trying %d %d\n", getpid(), ++counter, i);
-				bar(trans, DEFERRED_TRANSACTION,
-					insert, i, 23, 42);
-				printf("%d done %d %d\n", getpid(), counter, i);
-				sleep(1);
-			}
+	for(;;) {
+		int pid;
+		if(++i == num) {
+			do_one(insert, trans);
 			break;
 		} else {
-			pids[i] = pid;
-			if(++i == num) {
-				for(i=0;i<num;++i) {
-					int status = 0;
-					int pid = waitpid(i, &status, 0);
-					printf("%d status %x\n", pid, status);
-				}
-		}		
+			pid = fork();
+			if(pid == 0) {
+				do_one(insert, trans);
+				break;
+			}
+		}
 	}
 		
 	transdb_close(trans);
