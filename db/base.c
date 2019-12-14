@@ -62,6 +62,8 @@ sqlite3_stmt* prepare(sqlite3* c, string sql) {
 	return stmt;
 }
 
+int basedb_busy_timeout = 1000;
+
 static
 T open_with_flags(const char* path, int flags) {
 	T db = calloc(1,sizeof(struct T));
@@ -74,6 +76,7 @@ T open_with_flags(const char* path, int flags) {
 			flags | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_PRIVATECACHE,
 			NULL));
 	sqlite3_extended_result_codes(db->sqlite, 1);
+	sqlite3_busy_timeout(db->sqlite, basedb_busy_timeout);
 	db->begin = prepare(db->sqlite, LITSTR("BEGIN"));
 	db->commit = prepare(db->sqlite, LITSTR("COMMIT"));
 	db->rollback = prepare(db->sqlite, LITSTR("ROLLBACK"));

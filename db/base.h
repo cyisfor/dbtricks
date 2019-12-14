@@ -18,6 +18,8 @@ struct T;
 typedef struct T *T;
 typedef struct N(stmt) *N(stmt);
 
+extern int basedb_busy_timeout;
+
 struct N(open_params) {
 	const char* path;
 	bool readonly;

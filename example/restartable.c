@@ -4,7 +4,8 @@
 #include <sys/wait.h> // waitpid
 
 #include <unistd.h> // sleep, usleep
-#include <stdio.h> // 
+#include <stdio.h> 
+#include <stdlib.h> // drand48
 
 static int counter = 0;
 
@@ -56,18 +57,18 @@ int main(int argc, char *argv[])
 	for(;;) {
 		int pid;
 		if(++i == num) {
-			sleep(num);
+			usleep(num * 1000000 + drand48() * 3000000);
 			do_one(insert, trans);
 			for(i=0;i<num;++i) {
 				int status;
-				int pid = waitpid(pids[num], &status, 0);
+				int pid = waitpid(0, &status, 0);
 				printf("%d(%d) exited %d\n", pid, pids[num], status);
 			}
 			break;
 		} else {
 			pid = fork();
 			if(pid == 0) {
-				sleep(i);
+				usleep(i * 1000000 + drand48() * 3000000);
 				do_one(insert, trans);
 				break;
 			} else {
