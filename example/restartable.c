@@ -14,12 +14,12 @@ static int max_counter = 0;
 static
 result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int val, char val2) {
 	result cleanup(void) {
-		printf("%d cleanup for retrying %d %d\n", which, ++counter, i);
+		printf("%02d cleanup for retrying %d %d\n", which, ++counter, i);
 		if(counter > max_counter) {
 			max_counter = counter;
-			basedb_busy_timeout(db,  max_counter * 500);
+			printf("%02d setting timeout to %d\n", which, max_counter);
+			basedb_busy_timeout(db,  max_counter * 1000);
 		}
-		usleep(500000 * pow(0.95, counter));
 		return result_busy;
 	}
 
@@ -30,8 +30,8 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int v
 	transdb_check(basedb_once(insert));
 	transdb_check(basedb_once(insert));
 	transdb_check(basedb_once(insert));
-	sleep(1);
-	printf("%d inserted %d %d\n", which, counter, i);
+	usleep(1000000 * drand48());
+	printf("%02d inserted %d %d\n", which, counter, i);
 }
 
 #include "foo.c"
@@ -41,17 +41,17 @@ void do_one(int which, basedb_stmt insert, transdb trans) {
 	int i;
 	for(i=0;i<10;++i) {
 		counter = 0;
-		printf("%d trying %d\n", which, i);
+		printf("%02d trying %d\n", which, i);
 		bar(trans, DEFERRED_TRANSACTION,
 			insert, which, i, 23, 42);
-		printf("%d done %d %d\n", which, counter, i);
+		printf("%02d done %d %d\n", which, counter, i);
 		sleep(1);
 	}
 }
 
 int main(int argc, char *argv[])
 {
-	int num = 5;
+	int num = 20;
 	if(getenv("num")) {
 		num = atoi(getenv("num"));
 	}
@@ -70,13 +70,13 @@ int main(int argc, char *argv[])
 			for(i=0;i<num;++i) {
 				int status;
 				int pid = waitpid(0, &status, 0);
-				printf("%d(%d) exited %d\n", pid, i+1, status);
+				printf("%02d(%d) exited %d\n", i+1, pid, status);
 			}
 			break;
 		} else {
 			pid = fork();
 			if(pid == 0) {
-				usleep(i * 1000000 + drand48() * 3000000);
+				usleep(i * 1000000 * drand48() + 500000);
 				do_one(i, insert, trans);
 				break;
 			} else {
