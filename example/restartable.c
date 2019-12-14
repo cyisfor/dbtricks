@@ -10,9 +10,9 @@
 static int counter = 0;
 
 static
-result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char val2) {
+result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int val, char val2) {
 	result cleanup(void) {
-		printf("%d cleanup for retrying %d %d\n", getpid(), ++counter, i);
+		printf("%d cleanup for retrying %d %d\n", which, ++counter, i);
 		usleep(500000);
 		return result_busy;
 	}
@@ -25,19 +25,20 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char va
 	transdb_check(basedb_once(insert));
 	transdb_check(basedb_once(insert));
 	sleep(1);
-	printf("%d inserted %d %d\n", getpid(), counter, i);
+	printf("%d inserted %d %d\n", which, counter, i);
 }
 
 #include "foo.c"
 
-void do_one(basedb_stmt insert, transdb trans) {
+void do_one(int which, basedb_stmt insert, transdb trans) {
+	usleep(which * 1000000 + drand48() * 3000000);
 	int i;
 	for(i=0;i<10;++i) {
 		counter = 0;
-		printf("%d trying %d\n", getpid(), i);
+		printf("%d trying %d\n", which, i);
 		bar(trans, DEFERRED_TRANSACTION,
-			insert, i, 23, 42);
-		printf("%d done %d %d\n", getpid(), counter, i);
+			insert, which, i, 23, 42);
+		printf("%d done %d %d\n", which, counter, i);
 		sleep(1);
 	}
 }
@@ -57,19 +58,18 @@ int main(int argc, char *argv[])
 	for(;;) {
 		int pid;
 		if(++i == num) {
-			usleep(num * 1000000 + drand48() * 3000000);
-			do_one(insert, trans);
-			for(i=0;i<num;++i) {
+			do_one(num, insert, trans);
+			for(i=0;i<num-1;++i) {
 				int status;
 				int pid = waitpid(0, &status, 0);
-				printf("%d(%d) exited %d\n", pid, pids[num], status);
+				printf("%d(%d) exited %d\n", pid, i, status);
 			}
 			break;
 		} else {
 			pid = fork();
 			if(pid == 0) {
 				usleep(i * 1000000 + drand48() * 3000000);
-				do_one(insert, trans);
+				do_one(i, insert, trans);
 				break;
 			} else {
 				pids[num] = pid;
