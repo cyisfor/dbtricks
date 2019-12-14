@@ -1,6 +1,8 @@
 #include "db/base.h"
 #include "db/transaction.h"
 
+#include <sys/wait.h> // waitpid
+
 #include <unistd.h> // sleep, usleep
 #include <stdio.h> // 
 
@@ -53,16 +55,24 @@ int main(int argc, char *argv[])
 		int pid;
 		if(++i == num) {
 			do_one(insert, trans);
+			for(i=0;i<num;++i) {
+				int status;
+				int pid = waitpid(pids[num], &status, 0);
+				printf("%d(%d) exited %d\n", pid, pids[num], status);
+			}
 			break;
 		} else {
 			pid = fork();
 			if(pid == 0) {
 				do_one(insert, trans);
 				break;
+			} else {
+				pids[num] = pid;
 			}
 		}
 	}
-		
+
+	
 	transdb_close(trans);
 	basedb_finalize(insert);
 	basedb_close(db);
