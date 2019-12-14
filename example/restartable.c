@@ -6,6 +6,7 @@
 #include <unistd.h> // sleep, usleep
 #include <stdio.h> 
 #include <stdlib.h> // drand48
+#include <math.h> // pow
 
 static int counter = 0;
 
@@ -13,7 +14,7 @@ static
 result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int val, char val2) {
 	result cleanup(void) {
 		printf("%d cleanup for retrying %d %d\n", which, ++counter, i);
-		usleep(500000);
+		usleep(500000 * pow(0.99, counter));
 		return result_busy;
 	}
 
@@ -45,24 +46,25 @@ void do_one(int which, basedb_stmt insert, transdb trans) {
 
 int main(int argc, char *argv[])
 {
-    basedb db = basedb_open("/tmp/deletethis.sqlite", false);
-	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
-	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");
-	transdb trans = transdb_open(db);
 	int num = 5;
 	if(getenv("num")) {
 		num = atoi(getenv("num"));
 	}
+	basedb_busy_timeout = num * 1000;
+    basedb db = basedb_open("/tmp/deletethis.sqlite", false);
+	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
+	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");
+	transdb trans = transdb_open(db);
 	int i = 0;
 	int pids[num];
 	for(;;) {
 		int pid;
-		if(++i == num) {
-			do_one(num, insert, trans);
-			for(i=0;i<num-1;++i) {
+		if(++i == num+1) {
+//			do_one(num, insert, trans);
+			for(i=0;i<num;++i) {
 				int status;
 				int pid = waitpid(0, &status, 0);
-				printf("%d(%d) exited %d\n", pid, i, status);
+				printf("%d(%d) exited %d\n", pid, i+1, status);
 			}
 			break;
 		} else {

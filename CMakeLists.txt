@@ -98,4 +98,4 @@ add_custom_target(inner_include_crap2
 add_executable(restartable_example
   example/restartable.c)
 add_dependencies(restartable_example inner_include_crap2)
-target_link_libraries(restartable_example PRIVATE basedb)
+target_link_libraries(restartable_example PRIVATE basedb m)
