@@ -11,8 +11,8 @@ static int counter = 0;
 static
 result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char val2) {
 	result cleanup(void) {
-		printf("%d cleanup for retrying %d %d\n", getpid(), counter, i);
-		usleep(500);
+		printf("%d cleanup for retrying %d %d\n", getpid(), ++counter, i);
+		usleep(500000);
 		return result_busy;
 	}
 
@@ -25,7 +25,6 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char va
 	transdb_check(basedb_once(insert));
 	sleep(1);
 	printf("%d inserted %d %d\n", getpid(), counter, i);
-	counter = 0;
 }
 
 #include "foo.c"
@@ -33,7 +32,8 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int i, int val, char va
 void do_one(basedb_stmt insert, transdb trans) {
 	int i;
 	for(i=0;i<10;++i) {
-		printf("%d trying %d %d\n", getpid(), ++counter, i);
+		counter = 0;
+		printf("%d trying %d\n", getpid(), i);
 		bar(trans, DEFERRED_TRANSACTION,
 			insert, i, 23, 42);
 		printf("%d done %d %d\n", getpid(), counter, i);
@@ -47,13 +47,16 @@ int main(int argc, char *argv[])
 	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
 	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");
 	transdb trans = transdb_open(db);
-	int num = atoi(getenv("num"));
-	if(!num) num = 10;
+	int num = 5;
+	if(getenv("num")) {
+		num = atoi(getenv("num"));
+	}
 	int i = 0;
 	int pids[num];
 	for(;;) {
 		int pid;
 		if(++i == num) {
+			sleep(num);
 			do_one(insert, trans);
 			for(i=0;i<num;++i) {
 				int status;
@@ -64,6 +67,7 @@ int main(int argc, char *argv[])
 		} else {
 			pid = fork();
 			if(pid == 0) {
+				sleep(i);
 				do_one(insert, trans);
 				break;
 			} else {
