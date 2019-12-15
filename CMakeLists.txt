@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(dbtricks)
 
-configure_file(db/all_types.cmake.h db/all_types.h)
-configure_file(db/all_types.cmake.c db/all_types.c)
-
 add_custom_target(all_types
   DEPENDS db/all_types.c db/all_types.h)
 
