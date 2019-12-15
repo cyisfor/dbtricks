@@ -14,6 +14,7 @@ function(restartable_transaction target FUNCTION_NAME)
 	set(ARGUMENTS ", ${ARGUMENTS}")
 	set(VALUES ", ${VALUES}")
   endif()
+  set(WRAPPER_NAME "${FUNCTION_NAME}_in_transaction")
   configure_file("db/restartable_transaction.cmake.c" "${target}.c")
   add_custom_target("${target}"
 	DEPENDS "${target}.c")

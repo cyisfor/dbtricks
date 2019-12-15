@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(dbtricks)
 
-add_custom_target(all_types
-  DEPENDS db/all_types.c db/all_types.h)
-
 add_subdirectory(cstuff)
 add_cstuff(itoa record mmapfile)
 
