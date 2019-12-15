@@ -2,27 +2,29 @@ if(DEST)
   message("Writing to ${DEST}")
   file(WRITE "${DEST}")
   function (create_one_type)
+	list(JOIN BIND_ARGS ", " BIND_ARGS)
+	list(JOIN BIND_PARAMS ", " BIND_PARAMS)
 	if(IMPLEMENTATION)	
 	  file(APPEND "${DEST}" "EXPORT
-		result N(bind_${TYPE})(N(stmt) stmt, int col, ${BIND_ARGS}) {
-		return check(stmt->db,
-		  sqlite3_bind_${TYPE}(stmt->sqlite, col, ${BIND_PARAMS})) ;
-		}
-		")
+result N(bind_${TYPE})(N(stmt) stmt, int col, ${BIND_ARGS}) {
+	return check(stmt->db,
+		sqlite3_bind_${TYPE}(stmt->sqlite, col, ${BIND_PARAMS}));
+}
+")
 	  if(COLUMN_RETURN)
 		file(APPEND "${DEST}" "EXPORT
-		  ${COLUMN_RETURN} N(column_${TYPE})(N(stmt) stmt, int col) {
-		  return sqlite3_column_${TYPE}(stmt->sqlite, col) ;
-		  }
-		  ")
+${COLUMN_RETURN} N(column_${TYPE})(N(stmt) stmt, int col) {
+		return sqlite3_column_${TYPE}(stmt->sqlite, col);
+}
+")
 	  endif(COLUMN_RETURN)
 	else(IMPLEMENTATION)
-	  file(APPEND "${DEST}" "result N(bind_${TYPE})(N(stmt) , int col, ${BIND_ARGS}) ;
-		")
+	  file(APPEND "${DEST}" "result N(bind_${TYPE})(N(stmt) stmt, int col, ${BIND_ARGS});
+")
 	  if(COLUMN_RETURN)
-		file(APPEND "${DEST}" "${COLUMN_RETURN}
-		  N(column_${TYPE})(N(stmt) , int col) ;
-		  ")
+		file(APPEND "${DEST}" "${COLUMN_RETURN} N(column_${TYPE})(N(stmt), int col);
+
+")
 	  endif(COLUMN_RETURN)
 	endif(IMPLEMENTATION)
   endfunction(create_one_type)
@@ -36,24 +38,24 @@ if(DEST)
   endif(implementation)
 
   set(TYPE blob)
-  set(BIND_ARGS "const void* val, int len, void(*destructor)(void*)")
-  set(BIND_PARAMS "val, len, destructor")
+  set(BIND_ARGS "const void* val" "int len" "void(*destructor)(void*)")
+  set(BIND_PARAMS val len destructor)
   set(COLUMN_RETURN, "const void*")
   create_one_type()
   
   set(TYPE blob64)
-  set(BIND_ARGS "const void* val, u64 len, void(*destructor)(void*)")
+  set(BIND_ARGS "const void* val" "u64 len" "void(*destructor)(void*)")
   unset(COLUMN_RETURN)
   create_one_type()
   
   set(TYPE text)
-  set(BIND_ARGS "const char* val, int len, void(*destructor)(void*)")
+  set(BIND_ARGS "const char* val" "int len" "void(*destructor)(void*)")
   set(COLUMN_RETURN "const char*")
   create_one_type()
   
   set(TYPE text64)
-  set(BIND_ARGS "const char* val, u64 len, void(*destructor)(void*), unsigned char encoding")
-  set(BIND_PARAMS "val, len, destructor, encoding")
+  set(BIND_ARGS "const char* val" "u64 len" "void(*destructor)(void*)" "unsigned char encoding")
+  set(BIND_PARAMS val len destructor encoding)
   unset(COLUMN_RETURN)
   create_one_type()
 
@@ -73,13 +75,13 @@ if(DEST)
   simple(int64)
 
   set(TYPE zeroblob)
-  set(BIND_ARGS int length)
+  set(BIND_ARGS "int length")
   set(BIND_PARAMS length)
   unset(COLUMN_RETURN)
   create_one_type()
 
   set(TYPE zeroblob64)
-  set(BIND_ARGS u64 length)
+  set(BIND_ARGS "u64 length")
   create_one_type()
 else(DEST)
   add_custom_command(
