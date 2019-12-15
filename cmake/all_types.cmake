@@ -30,11 +30,15 @@ ${COLUMN_RETURN} N(column_${TYPE})(N(stmt) stmt, int col) {
   endfunction(create_one_type)
 
   if(implementation)
-	file(APPEND  "#include \"all_types.h\"
-	  #include <sqlite3.h>")
+	file(APPEND "${DEST}"  "#include \"all_types.h\"
+#include <sqlite3.h>
+
+")
   else(implementation)
-	file(APPEND "#include \"myint.h\"
-	  #include \"result.h\"")
+	file(APPEND "${DEST}" "#include \"myint.h\"
+#include \"result.h\"
+
+")
   endif(implementation)
 
   set(TYPE blob)
