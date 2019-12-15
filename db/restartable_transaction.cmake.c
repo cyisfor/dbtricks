@@ -8,17 +8,17 @@ result @FUNCTION_NAME@(struct transdb* db,
 	if(!db->begin[type]) {
 		switch(type) {
 		case DEFERRED_TRANSACTION:
-			PREPARE(db, begin[type], "BEGIN");
+			db->begin[type] = basedb_prepare(db->conn, "BEGIN");
 			break;
 		case IMMEDIATE_TRANSACTION:
-			PREPARE(db, begin[type], "BEGIN IMMEDIATE TRANSACTION");
+			db->begin[type] = basedb_prepare(db->conn, "BEGIN IMMEDIATE TRANSACTION");			
 			break;
 		case EXCLUSIVE_TRANSACTION:
-			PREPARE(db, begin[type], "BEGIN EXCLUSIVE TRANSACTION");
+			db->begin[type] = basedb_prepare(db->conn, "BEGIN EXCLUSIVE TRANSACTION");			
 			break;
 		};
 		if(!db->commit)
-			PREPARE(db, commit, "COMMIT");
+			db->commit = basedb_prepare(db->conn, "COMMIT");			
 	}
 	for(;;) {
 		basedb_once(db->begin[type]);
@@ -26,7 +26,7 @@ result @FUNCTION_NAME@(struct transdb* db,
 		switch(res) {
 		case result_busy:
 			if(!db->rollback) {
-				PREPARE(db, rollback, "ROLLBACK");
+				db->rollback = basedb_prepare(db->conn, "ROLLBACK");			
 			}
 			basedb_once(db->rollback);
 			continue;
@@ -35,7 +35,7 @@ result @FUNCTION_NAME@(struct transdb* db,
 			basedb_once(db->commit);
 		default:
 			if(!db->rollback) {
-				PREPARE(db, rollback, "ROLLBACK");
+				db->rollback = basedb_prepare(db->conn, "ROLLBACK");
 			}
 			basedb_once(db->rollback);
 		};
