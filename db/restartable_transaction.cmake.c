@@ -29,6 +29,7 @@ result @FUNCTION_NAME@(struct transdb* db,
 				db->rollback = basedb_prepare(db->conn, "ROLLBACK");			
 			}
 			basedb_once(db->rollback);
+			double 
 			continue;
 		case result_success:
 		case result_pending:

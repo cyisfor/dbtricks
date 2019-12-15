@@ -26,6 +26,7 @@ struct T {
 	int transaction_depth;
 	int error;
 	void* udata;
+	int timeout;
 };
 
 typedef struct N(stmt) {
@@ -62,8 +63,13 @@ sqlite3_stmt* prepare(sqlite3* c, string sql) {
 	return stmt;
 }
 
+int basedb_get_busy_timeout(T db) {
+	return db->timeout;
+}
+
 int basedb_busy_timeout(T db, int ms) {
-	sqlite3_busy_timeout(db->sqlite, ms);
+	db->timeout = ms;
+	return sqlite3_busy_timeout(db->sqlite, ms);
 }
 	
 static
@@ -81,6 +87,7 @@ T open_with_flags(const char* path, int flags) {
 	db->begin = prepare(db->sqlite, LITSTR("BEGIN"));
 	db->commit = prepare(db->sqlite, LITSTR("COMMIT"));
 	db->rollback = prepare(db->sqlite, LITSTR("ROLLBACK"));
+	db->timeout = 0 ;
 	return db;
 }
 

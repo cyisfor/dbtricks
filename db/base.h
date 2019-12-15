@@ -29,6 +29,7 @@ T N(open_f)(struct N(open_params));
 	})
 void N(close)(T db);
 
+int basedb_get_busy_timeout(T db);
 int basedb_busy_timeout(T db, int ms);
 size_t N(stmt_changes)(N(stmt) db);
 
