@@ -93,4 +93,3 @@ else(DEST)
 	cmake -DDEST=db/all_types.h -P "${CMAKE_CURRENT_LIST_FILE}"
 	DEPENDS "${CMAKE_CURRENT_LIST_FILE}")
 endif(DEST)
-

@@ -15,6 +15,9 @@ pkg_check_modules(SQLITE
   REQUIRED IMPORTED_TARGET
   sqlite3)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+include(all_types)
 include(restartable_transaction)
 
 restartable_transaction(runtime_transaction transaction transdb_handler handler void* udata)
