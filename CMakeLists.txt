@@ -62,7 +62,6 @@ function(restartable_transaction target function)
 	DEST "${target}.c"
 	OPTIONS
 	"-DFUNCTION_NAME=${function}"
-	"-DDERPARGUMENTS=${derparguments}"
 	"-DARGUMENTS=${arguments}"
 	"-DVALUES=${values}")
   add_custom_target("${target}"

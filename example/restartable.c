@@ -30,7 +30,7 @@ result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int v
 	transdb_check(basedb_once(insert));
 	transdb_check(basedb_once(insert));
 	transdb_check(basedb_once(insert));
-	usleep(1000000 * drand48());
+	usleep(1000000 * drand48() + 500000);
 	printf("%02d inserted %d %d\n", which, counter, i);
 }
 
