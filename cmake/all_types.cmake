@@ -4,22 +4,22 @@ if(DEST)
 	  file(APPEND "${DEST}" EXPORT
 		result N(bind_${TYPE})(N(stmt) stmt, int col, ${BIND_ARGS}) {
 		return check(stmt->db,
-		  sqlite3_bind_${TYPE}(stmt->sqlite, col, ${BIND_PARAMS}));
+		  sqlite3_bind_${TYPE}(stmt->sqlite, col, ${BIND_PARAMS})) ;
 		}
 		)
 	  if(COLUMN_RETURN)
 		file(APPEND "${DEST}" EXPORT
 		  ${COLUMN_RETURN} N(column_${TYPE})(N(stmt) stmt, int col) {
-		  return sqlite3_column_${TYPE}(stmt->sqlite, col);
+		  return sqlite3_column_${TYPE}(stmt->sqlite, col) ;
 		  }
 		  )
 	  endif(COLUMN_RETURN)
 	else(IMPLEMENTATION)
-	  file(APPEND "${DEST}" result N(bind_${TYPE})(N(stmt), int col, ${BIND_ARGS});
+	  file(APPEND "${DEST}" result N(bind_${TYPE})(N(stmt) , int col, ${BIND_ARGS}) ;
 		)
 	  if(COLUMN_RETURN)
 		file(APPEND "${DEST}" ${COLUMN_RETURN}
-		  (column_${TYPE})(N(stmt), int col);
+		  N(column_${TYPE})(N(stmt) , int col) ;
 		  )
 	  endif(COLUMN_RETURN)
 	endif(IMPLEMENTATION)
@@ -58,10 +58,10 @@ if(DEST)
 
 	function (simple TYPE)
 	  if(COLUMN_RETURN)
-	  else()
-		set(COLUMN_RETURN "${TYPE}");
+	  else(COLUMN_RETURN)
+		set(COLUMN_RETURN "${TYPE}")
 	  endif()
-	  set(BIND_ARGS "${COLUMN_RETURN} val");
+	  set(BIND_ARGS "${COLUMN_RETURN} val")
 	  set(BIND_PARAMS "val")
 	  create_one_type()
 	  unset(COLUMN_RETURN)
@@ -85,7 +85,7 @@ else(DEST)
   add_custom_command(
 	OUTPUT "db/all_types.c"
 	COMMAND
-	cmake -DDEST=db/all_types.c -DIMPLEMENTATION -P "${CMAKE_CURRENT_LIST_FILE}"
+	cmake -DDEST=db/all_types.c -DIMPLEMENTATION=TRUE -P "${CMAKE_CURRENT_LIST_FILE}"
 	DEPENDS "${CMAKE_CURRENT_LIST_FILE}")
   add_custom_command(
 	OUTPUT "db/all_types.h"

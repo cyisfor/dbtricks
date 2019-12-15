@@ -18,10 +18,8 @@ include(all_types)
 include(restartable_transaction)
 
 restartable_transaction(runtime_transaction transaction transdb_handler handler void* udata)
-add_custom_target(inner_include_crap
-  DEPENDS runtime_transaction.c)
 add_library(basedb db/base.c db/transaction.c)
-add_dependencies(basedb all_types inner_include_crap)
+add_dependencies(basedb all_types)
 target_include_directories(basedb PUBLIC
   "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/db")
 target_link_libraries(basedb cstuff PkgConfig::SQLITE)
@@ -30,9 +28,6 @@ add_executable(example example/main.c)
 target_link_libraries(example PRIVATE basedb)
 
 restartable_transaction(foo bar basedb_stmt insert int i int which int val char val2)
-add_custom_target(inner_include_crap2
-  DEPENDS foo.c)
 add_executable(restartable_example
   example/restartable.c)
-add_dependencies(restartable_example inner_include_crap2)
 target_link_libraries(restartable_example PRIVATE basedb m)
