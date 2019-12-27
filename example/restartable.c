@@ -9,17 +9,11 @@
 #include <math.h> // pow
 
 static int counter = 1;
-static int max_counter = 1;
 
 static
 result bar_in_transaction(basedb db, basedb_stmt insert, int which, int i, int val, char val2) {
 	result cleanup(void) {
 		printf("%02d cleanup for retrying %d %d\n", which, ++counter, i);
-		if(counter > max_counter) {
-			max_counter = counter;
-			printf("%02d setting timeout to %d\n", which, max_counter);
-			basedb_busy_timeout(db,  max_counter * 1000);
-		}
 		return result_busy;
 	}
 
@@ -56,7 +50,6 @@ int main(int argc, char *argv[])
 		num = atoi(getenv("num"));
 	}
 	basedb db = basedb_open("/tmp/deletethis.sqlite", false);
-	basedb_busy_timeout(db,  num * 100);
 
 	basedb_exec(db, "CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, val INTEGER)");
 	basedb_stmt insert = basedb_prepare(db, "INSERT INTO foo (val) SELECT ?+?+?");

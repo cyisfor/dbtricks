@@ -29,7 +29,11 @@ result @FUNCTION_NAME@(struct transdb* db,
 				db->rollback = basedb_prepare(db->conn, "ROLLBACK");			
 			}
 			basedb_once(db->rollback);
-			double 
+			int timeout = basedb_get_busy_timeout(db->conn);
+			if(timeout == 1) timeout = 2;
+			else if(timeout > 1) timeout *= 1 + drand48();
+			else timeout = 100; // 100ms by default if conflict
+			basedb_busy_timeout(db->conn, timeout);
 			continue;
 		case result_success:
 		case result_pending:
