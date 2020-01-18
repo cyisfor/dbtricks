@@ -42,24 +42,23 @@ ${COLUMN_RETURN} N(column_${TYPE})(N(stmt) stmt, int col) {
   endif(implementation)
 
   set(TYPE blob)
-  set(BIND_ARGS "const void* val" "int len" "void(*destructor)(void*)")
-  set(BIND_PARAMS val len destructor)
-  set(COLUMN_RETURN, "const void*")
+  set(BIND_ARGS "const string val")
+  set(BIND_PARAMS val.base val.len NULL)
+  create_one_type()
+
+  set(TYPE text)
+  set(BIND_ARGS "const string val")
   create_one_type()
   
   set(TYPE blob64)
   set(BIND_ARGS "const void* val" "u64 len" "void(*destructor)(void*)")
+  set(BIND_PARAMS val len destructor)
   unset(COLUMN_RETURN)
-  create_one_type()
-  
-  set(TYPE text)
-  set(BIND_ARGS "const char* val" "int len" "void(*destructor)(void*)")
-  set(COLUMN_RETURN "const char*")
   create_one_type()
   
   set(TYPE text64)
   set(BIND_ARGS "const char* val" "u64 len" "void(*destructor)(void*)" "unsigned char encoding")
-  set(BIND_PARAMS val len destructor encoding)
+  set(BIND_PARAMS val len destructor encoding)  
   unset(COLUMN_RETURN)
   create_one_type()
 

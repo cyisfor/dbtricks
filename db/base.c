@@ -146,6 +146,10 @@ result N(full_commit)(T self) {
 	return check(self,full_commit(self));
 }
 
+result N(check)(T db, int res) {
+	return check(db, res);
+}
+
 result check(T db, int res) {
 	switch(res) {
 	case SQLITE_OK:

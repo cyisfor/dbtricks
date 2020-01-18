@@ -29,6 +29,8 @@ T N(open_f)(struct N(open_params));
 	})
 void N(close)(T db);
 
+result N(check)(T db, int res);
+
 int basedb_get_busy_timeout(T db);
 int basedb_busy_timeout(T db, int ms);
 size_t N(stmt_changes)(N(stmt) db);
@@ -77,9 +79,9 @@ result N(retransaction)(T db);
 bool N(has_table_str)(T db, string table_name);
 #define basedb_has_table(db, lit) basedb_has_table_str(db, LITSTR(lit))
 
-#include "all_types.h"
-result N(bind_string)(N(stmt) stmt, int col, string value);
 string N(column_string)(N(stmt) stmt, int col);
+#include "all_types.h"
+
 #define basedb_bind_identifier basedb_bind_int64
 #define basedb_column_identifier basedb_column_int64
 

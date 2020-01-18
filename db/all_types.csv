@@ -1,0 +1,21 @@
+TYPE	BIND_ARGS	BIND_PARAMS	COLUMN_RETURN
+blob	const void* val, int len, void(*destructor)(void*)	val, len, destructor	const void*	blob64
+TYPE}}	blob64)
+BIND_ARGS}}	{{const void* val	u64 len	void(*destructor)(void*)}})
+TYPE}}	text)
+BIND_ARGS}}	{{const char* val	int len	void(*destructor)(void*)}})
+COLUMN_RETURN}}	{{const char*}})
+TYPE}}	text64);
+BIND_ARGS}}	{{const char* val	u64 len	void(*destructor)(void*)	unsigned char encoding}});
+BIND_PARAMS}}	{{val	len	destructor	encoding}});
+TYPE}}	double);
+COLUMN_RETURN}}	{{TYPE}});
+BIND_ARGS}}	{{COLUMN_RETURN val}});
+BIND_PARAMS}}	{{val}});
+TYPE}}	int);
+TYPE}}	int64);
+COLUMN_RETURN}}	{{s64}});
+TYPE}}	zeroblob);
+BIND_ARGS}}	{{int val}});
+TYPE}}	zeroblob64);
+BIND_ARGS}}	{{u64 val}});
