@@ -7,9 +7,8 @@ pkg_check_modules(SQLITE
   sqlite3)
 
 if(SQLITE_FOUND)
-  
   add_subdirectory(cstuff)
-  add_cstuff(itoa record mmapfile)
+  add_cstuff(record mmapfile)
 
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -21,8 +20,7 @@ if(SQLITE_FOUND)
   add_dependencies(basedb all_types runtime_transaction)
   target_include_directories(basedb PUBLIC
 	"${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/db")
-  target_link_libraries(basedb PRIVATE cstuff)
-  target_link_libraries(basedb PUBLIC PkgConfig::SQLITE)
+  target_link_libraries(basedb PUBLIC cstuff PkgConfig::SQLITE)
 
   if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 	add_executable(example example/main.c)
