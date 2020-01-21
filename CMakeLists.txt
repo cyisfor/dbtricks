@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.14)
 project(dbtricks)
 
-add_subdirectory(cstuff)
-add_cstuff(itoa record mmapfile)
-
 include(FindPkgConfig)
 pkg_check_modules(SQLITE
   IMPORTED_TARGET
   sqlite3)
 
 if(SQLITE_FOUND)
+  
+  add_subdirectory(cstuff)
+  add_cstuff(itoa record mmapfile)
+
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
   include(all_types)
