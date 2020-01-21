@@ -18,5 +18,7 @@ function(restartable_transaction target FUNCTION_NAME)
   configure_file("db/restartable_transaction.cmake.c" "${target}.c")
   configure_file("db/restartable_transaction.cmake.h" "${target}.h")
   add_custom_target("${target}"
-	DEPENDS "${target}.c" "${target}.h")
+	DEPENDS
+	"${CMAKE_CURRENT_BINARY_DIR}/${target}.c"
+	"${CMAKE_CURRENT_BINARY_DIR}/${target}.h")
 endfunction(restartable_transaction)
