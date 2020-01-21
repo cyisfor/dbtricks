@@ -19,12 +19,14 @@ add_library(basedb db/base.c db/transaction.c)
 add_dependencies(basedb all_types)
 target_include_directories(basedb PUBLIC
   "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/db")
-target_link_libraries(basedb cstuff PkgConfig::SQLITE)
+target_link_libraries(basedb PUBLIC cstuff PkgConfig::SQLITE)
 
-add_executable(example example/main.c)
-target_link_libraries(example PRIVATE basedb)
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+  add_executable(example example/main.c)
+  target_link_libraries(example PRIVATE basedb)
 
-restartable_transaction(foo bar basedb_stmt insert int i int which int val char val2)
-add_executable(restartable_example
-  example/restartable.c)
-target_link_libraries(restartable_example PRIVATE basedb m)
+  restartable_transaction(foo bar basedb_stmt insert int i int which int val char val2)
+  add_executable(restartable_example
+	example/restartable.c)
+  target_link_libraries(restartable_example PRIVATE basedb m)
+endif()
