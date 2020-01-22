@@ -8,6 +8,7 @@ pkg_check_modules(SQLITE
 
 if(SQLITE_FOUND)
   if(NOT TARGET cstuff)
+	list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/add_module")
 	include(AddModule)
 	add_module(cstuff
 	  GIT 02b68de998087d3bc4703c2e3bc2776e2069b964
