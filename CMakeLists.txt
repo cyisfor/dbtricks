@@ -7,7 +7,16 @@ pkg_check_modules(SQLITE
   sqlite3)
 
 if(SQLITE_FOUND)
-  add_subdirectory(cstuff)
+  if(NOT TARGET cstuff)
+	
+	include(ExternalProject)
+	ExternalProject_Add(get_cstuff
+	  GIT_REPOSITORY /home/derp/cstuff)
+	ExternalProject_Add(get2_cstuff
+	  GIT_REPOSITORY /home/herp/cstuff)
+
+	add_subdirectory(cstuff)
+  endif()
   add_cstuff(record mmapfile)
 
   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
