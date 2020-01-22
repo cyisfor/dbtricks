@@ -8,14 +8,13 @@ pkg_check_modules(SQLITE
 
 if(SQLITE_FOUND)
   if(NOT TARGET cstuff)
-	
-	include(ExternalProject)
-	ExternalProject_Add(get_cstuff
-	  GIT_REPOSITORY /home/derp/cstuff)
-	ExternalProject_Add(get2_cstuff
-	  GIT_REPOSITORY /home/herp/cstuff)
-
-	add_subdirectory(cstuff)
+	include(AddModule)
+	add_module(cstuff
+	  GIT 02b68de998087d3bc4703c2e3bc2776e2069b964
+	  SHALLOW NORECURSE
+	  /home/derp/cstuff
+	  /home/herp/cstuff
+	  /home/repo/cstuff)
   endif()
   add_cstuff(record mmapfile)
 
