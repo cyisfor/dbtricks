@@ -11,8 +11,7 @@ if(SQLITE_FOUND)
 	list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/add_module")
 	include(AddModule)
 	add_module(cstuff
-	  GIT 02b68de998087d3bc4703c2e3bc2776e2069b964
-	  URLS
+	  GIT 874ae5456e63ea82ddba9cca149600a71be06daf
 	  file:///home/repo/cstuff
 	  git@github.com:cyisfor/cstuff.git
 	  https://github.com/cyisfor/cstuff.git)
