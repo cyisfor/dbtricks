@@ -14,9 +14,9 @@ if(SQLITE_FOUND)
 	  GIT 02b68de998087d3bc4703c2e3bc2776e2069b964
 	  SHALLOW NORECURSE
 	  URLS
-	  file:///home/derp/cstuff
-	  file:///home/herp/cstuff
-	  file:///home/repo/cstuff)
+	  file:///home/repo/cstuff
+	  git@github.com:cyisfor/cstuff.git
+	  https://github.com/cyisfor/cstuff.git)
   endif()
   add_cstuff(record mmapfile)
 
