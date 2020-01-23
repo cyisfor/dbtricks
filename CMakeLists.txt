@@ -12,7 +12,6 @@ if(SQLITE_FOUND)
 	include(AddModule)
 	add_module(cstuff
 	  GIT 02b68de998087d3bc4703c2e3bc2776e2069b964
-	  SHALLOW NORECURSE
 	  URLS
 	  file:///home/repo/cstuff
 	  git@github.com:cyisfor/cstuff.git
