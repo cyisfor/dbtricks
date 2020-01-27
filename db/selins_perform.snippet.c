@@ -15,7 +15,7 @@
 		basedb_reset(SELINS.select);
 		BIND(SELINS.insert, SELINS_INSERT);
 		basedb_once(SELINS.insert);
-		ident = basedb_lastident(SELINS.db);
+		ident = basedb_lastrow(SELINS.db);
 	}
 	RETURN(ident);
 }
