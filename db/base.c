@@ -13,7 +13,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <error.h>
 #include <unistd.h> // sleep
 
 #define N(a) CONCATSYM(basedb_, a)
