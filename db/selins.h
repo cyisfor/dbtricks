@@ -1,4 +1,5 @@
 #include "base.h"
+#include "concatsym.h"// STRIFY
 
 enum selins_bind_mode {
 	SELINS_SELECT,
@@ -26,10 +27,18 @@ static struct selins create_selins(basedb db, const string select, const string 
 	}
 	return ret;
 }
+
+static void destroy_selins(struct selins selins) {
+	basedb_finalize(selins.select);
+	basedb_finalize(selins.insert);
+	if(selins.update) {
+		basedb_finalize(selins.update);
+	}
+}
 	
 #define CREATE_SELINS(db, select, insert, update, identparam) create_selins(\
 		db,																\
 		LITSTR("SELECT id FROM " select),								\
 		LITSTR("INSERT INTO " insert),									\
-		( LITSIZ(update) == 0 ? (const string){} : LITSTR("UPDATE " update " WHERE id = ?" #identparam)), \
+		( LITSIZ(update) == 0 ? (const string){} : LITSTR("UPDATE " update " WHERE id = ?" STRIFY(identparam))), \
 		identparam)
