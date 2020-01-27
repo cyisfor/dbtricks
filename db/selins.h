@@ -1,4 +1,11 @@
-#include "basedb.h"
+#include "base.h"
+
+enum selins_bind_mode {
+	SELINS_SELECT,
+	SELINS_UPDATE,
+	SELINS_INSERT
+};
+
 struct selins {
 	basedb db;
 	basedb_stmt select;
@@ -24,5 +31,5 @@ static struct selins create_selins(basedb db, const string select, const string 
 		db,																\
 		LITSTR("SELECT id FROM " select),								\
 		LITSTR("INSERT INTO " insert),									\
-		( update ? LITSTR("UPDATE " update " WHERE id = ?" #identparam) : (const string){}), \
+		( LITSIZ(update) == 0 ? (const string){} : LITSTR("UPDATE " update " WHERE id = ?" #identparam)), \
 		identparam)
